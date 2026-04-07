@@ -21,7 +21,7 @@ export function CelebrationBanner({ message }: CelebrationBannerProps) {
             alt="HabitUp celebrando"
             className="w-12 h-12 object-contain flex-shrink-0"
             initial={{ scale: 0, rotate: -30 }}
-            animate={{ scale: [0, 1.2, 1], rotate: [−30, 10, 0] }}
+            animate={{ scale: [0, 1.2, 1], rotate: [-30, 10, 0] }}
             transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
           />
           <div>
