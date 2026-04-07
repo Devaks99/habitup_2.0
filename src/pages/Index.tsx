@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Plus, Settings, Flame, Star, RotateCcw, ChevronDown, Calendar, Repeat, Trash2 } from 'lucide-react';
 import { getTodayWeekDay, getXpProgress, WEEKDAY_LABELS } from '@/types/habit';
 import mascotImg from '@/assets/mascote_habitup.png';
+import mascotCelebrationImg from '@/assets/mascote_comemoracao_habitup.png';
 import type { UserProfile } from '@/types/userProfile';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -144,11 +145,12 @@ const Index = ({ profile }: IndexProps) => {
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <motion.img
-                      src={mascotImg}
+                      src={completionPercentage === 100 ? mascotCelebrationImg : mascotImg}
                       alt="HabitUp mascote"
                       className="w-12 h-12 object-contain mb-0.5"
+                      key={completionPercentage === 100 ? 'celebration' : 'normal'}
                       initial={{ scale: 0.5, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
+                      animate={{ scale: completionPercentage === 100 ? [0.5, 1.3, 1] : 1, opacity: 1 }}
                       transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                     />
                     <span className="text-[11px] font-display font-bold text-foreground leading-none">
