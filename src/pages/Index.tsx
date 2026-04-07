@@ -70,7 +70,7 @@ const Index = ({ profile }: IndexProps) => {
   const scheduledHabits = habits.filter(h => h.type === 'scheduled');
 
   // SVG circle
-  const radius = 46;
+  const radius = 52;
   const circumference = 2 * Math.PI * radius;
   const progressOffset = circumference - (completionPercentage / 100) * circumference;
 
