@@ -139,14 +139,14 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
             <div
               ref={cardRef}
               style={{
-                width: 380,
-                minHeight: 220,
+                width: 400,
+                minHeight: 280,
                 background: 'linear-gradient(145deg, #e8f5e8 0%, #f0f7e8 30%, #fdf8ef 60%, #fff9f0 100%)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '32px 28px 24px',
+                padding: '36px 28px 26px',
                 position: 'relative',
                 overflow: 'hidden',
                 fontFamily: "'Space Grotesk', 'Inter', sans-serif",
@@ -184,8 +184,8 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
                 src={mascot.src}
                 alt="Mascote"
                 style={{
-                  width: 72, height: 72, objectFit: 'contain',
-                  marginBottom: 16,
+                  width: 96, height: 96, objectFit: 'contain',
+                  marginBottom: 20,
                   filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.08))',
                 }}
                 crossOrigin="anonymous"
