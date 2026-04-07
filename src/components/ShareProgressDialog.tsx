@@ -29,19 +29,21 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
   const [selectedMascot, setSelectedMascot] = useState('default');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const mascotImgRef = useRef<HTMLImageElement>(null);
 
   const mascot = MASCOTS.find(m => m.id === selectedMascot) || MASCOTS[0];
 
   const handleDownload = useCallback(async () => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || !imageLoaded) return;
     setIsGenerating(true);
     try {
-        const dataUrl = await toPng(cardRef.current, {
+      const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         cacheBust: true,
-        skipFonts: true,
       });
+      console.log('Generated image dataUrl length:', dataUrl.length); // Debug: check if mascot included (larger size)
       const link = document.createElement('a');
       link.download = `habitup-progresso.png`;
       link.href = dataUrl;
@@ -54,14 +56,14 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
   }, []);
 
   const handleShare = useCallback(async () => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || !imageLoaded) return;
     setIsGenerating(true);
     try {
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         cacheBust: true,
-        skipFonts: true,
       });
+      console.log('Share image dataUrl length:', dataUrl.length); // Debug
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], 'habitup-progresso.png', { type: 'image/png' });
 
@@ -179,6 +181,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
 
               {/* Mascot */}
               <img
+                ref={mascotImgRef}
                 src={mascot.src}
                 alt="Mascote"
                 style={{
@@ -186,8 +189,8 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
                   marginBottom: 20,
                   filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.08))',
                 }}
-                referrerPolicy="no-referrer"
-                crossOrigin="anonymous"
+                onLoad={() => setImageLoaded(true)}
+                onError={() => console.error('Mascot image load failed:', mascot.src)}
               />
 
               {/* Stats */}
@@ -265,7 +268,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
         <div className="px-5 pb-5 flex flex-col sm:flex-row gap-2">
           <Button
             onClick={handleDownload}
-            disabled={isGenerating}
+            disabled={isGenerating || !imageLoaded}
             className="flex-1 rounded-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 text-sm font-medium"
           >
             <Download className="w-4 h-4" />
@@ -273,7 +276,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
           </Button>
           <Button
             onClick={handleShare}
-            disabled={isGenerating}
+            disabled={isGenerating || !imageLoaded}
             variant="outline"
             className="flex-1 rounded-full gap-2 h-10 text-sm font-medium border-border"
           >
