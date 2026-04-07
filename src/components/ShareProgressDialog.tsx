@@ -96,7 +96,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
           Compartilhar
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-md p-0 gap-0 overflow-hidden rounded-2xl border-border mx-auto">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md max-h-[90vh] p-0 gap-0 overflow-y-auto rounded-2xl border-border mx-auto">
         <DialogHeader className="px-5 pt-5 pb-3">
           <DialogTitle className="text-base font-display font-bold">Compartilhar progresso</DialogTitle>
         </DialogHeader>

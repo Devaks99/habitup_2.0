@@ -97,7 +97,7 @@ const Index = ({ profile }: IndexProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="relative z-10 px-5 pt-10 pb-[40px] rounded-b-[2.5rem] bg-[#8fbc8f14] backdrop-blur-sm border-b border-[#8fbc8f]" style={{ borderBottomWidth: '3px' }}>
+      <header className="relative z-10 px-5 pt-12 pb-8 rounded-b-xl bg-background/80 backdrop-blur-sm border-b border-border/50">
         <div className="mx-auto max-w-lg">
           {/* Top row: Brand + Settings */}
           <div className="flex items-center justify-between mb-4">

@@ -48,7 +48,7 @@ export function AddHabitDialog({ open, onOpenChange, onAdd }: AddHabitDialogProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] mx-auto my-4 rounded-2xl p-6 sm:max-w-md sm:p-6 sm:mx-0">
+      <DialogContent className="max-w-[90vw] max-h-[90vh] mx-auto my-4 rounded-2xl p-6 sm:max-w-md sm:p-6 sm:mx-0 overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display">Novo Hábito</DialogTitle>
           <DialogDescription>Crie um hábito para acompanhar diariamente.</DialogDescription>
