@@ -40,8 +40,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
         const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         cacheBust: true,
-        skipFonts: false,
-        imagePlaceholder: 'transparent',
+        skipFonts: true,
       });
       const link = document.createElement('a');
       link.download = `habitup-progresso.png`;
@@ -61,6 +60,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         cacheBust: true,
+        skipFonts: true,
       });
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], 'habitup-progresso.png', { type: 'image/png' });
