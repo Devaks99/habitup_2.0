@@ -80,15 +80,10 @@ const Index = ({ profile }: IndexProps) => {
       <header className="px-5 pt-8 pb-5">
         <div className="mx-auto max-w-lg">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              <motion.img
-                src={mascotImg}
-                alt="HabitUp mascote"
-                className="w-10 h-10 object-contain"
-                initial={{ scale: 0, rotate: -20 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
-              />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-display font-bold text-sm">H</span>
+              </div>
               <span className="font-display font-bold text-foreground text-lg tracking-tight">HabitUp</span>
             </div>
             <Button
@@ -152,8 +147,9 @@ const Index = ({ profile }: IndexProps) => {
                       src={mascotImg}
                       alt="HabitUp mascote"
                       className="w-12 h-12 object-contain mb-0.5"
-                      animate={{ y: [0, -3, 0] }}
-                      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                     />
                     <span className="text-[11px] font-display font-bold text-foreground leading-none">
                       {completionPercentage}%
@@ -167,8 +163,8 @@ const Index = ({ profile }: IndexProps) => {
                     alt="HabitUp mascote"
                     className="w-24 h-24 object-contain"
                     initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1, y: [0, -4, 0] }}
-                    transition={{ scale: { type: 'spring', stiffness: 200, damping: 15 }, y: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' } }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                   />
                 </div>
               )}
