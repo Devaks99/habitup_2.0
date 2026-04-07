@@ -257,6 +257,13 @@ const Index = ({ profile }: IndexProps) => {
             <div className="text-[11px] text-muted-foreground">
               {habits.length} total
             </div>
+            <div className="ml-auto">
+              <ShareProgressDialog
+                streak={stats.currentStreak}
+                level={stats.level}
+                totalXp={stats.totalXp}
+              />
+            </div>
           </div>
         </motion.div>
 
