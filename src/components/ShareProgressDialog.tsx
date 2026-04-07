@@ -186,6 +186,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
                   marginBottom: 20,
                   filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.08))',
                 }}
+                referrerPolicy="no-referrer"
                 crossOrigin="anonymous"
               />
 
