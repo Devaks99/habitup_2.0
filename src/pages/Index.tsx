@@ -171,7 +171,8 @@ const Index = ({ profile }: IndexProps) => {
                               : mascotImg
                         }
                         alt="HabitUp mascote"
-                        className="w-14 h-14 object-contain mb-0.5"
+                        className="w-14 h-14 object-contain mb-0.5 cursor-pointer"
+                        onClick={triggerWaving}
                         key={completionPercentage === 100 ? 'celebration' : showWaving ? 'waving' : 'normal'}
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
