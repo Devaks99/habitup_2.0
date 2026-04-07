@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHabits } from '@/hooks/useHabits';
 import { HabitCard } from '@/components/HabitCard';
@@ -47,10 +47,17 @@ const Index = ({ profile }: IndexProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showAllHabits, setShowAllHabits] = useState(false);
   const [showWaving, setShowWaving] = useState(true);
+  const wavingTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const triggerWaving = () => {
+    clearTimeout(wavingTimerRef.current);
+    setShowWaving(true);
+    wavingTimerRef.current = setTimeout(() => setShowWaving(false), 6000);
+  };
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowWaving(false), 6000);
-    return () => clearTimeout(timer);
+    wavingTimerRef.current = setTimeout(() => setShowWaving(false), 6000);
+    return () => clearTimeout(wavingTimerRef.current);
   }, []);
   const {
     habits,
@@ -164,7 +171,8 @@ const Index = ({ profile }: IndexProps) => {
                               : mascotImg
                         }
                         alt="HabitUp mascote"
-                        className="w-14 h-14 object-contain mb-0.5"
+                        className="w-14 h-14 object-contain mb-0.5 cursor-pointer"
+                        onClick={triggerWaving}
                         key={completionPercentage === 100 ? 'celebration' : showWaving ? 'waving' : 'normal'}
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -183,7 +191,8 @@ const Index = ({ profile }: IndexProps) => {
                     <motion.img
                       src={showWaving ? mascotWavingImg : mascotImg}
                       alt="HabitUp mascote"
-                      className="w-24 h-24 object-contain"
+                      className="w-24 h-24 object-contain cursor-pointer"
+                      onClick={triggerWaving}
                       key={showWaving ? 'waving-empty' : 'normal-empty'}
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
