@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Habit, DayProgress, UserStats } from '@/types/habit';
-import { getTodayKey, isHabitActiveToday, getLevel } from '@/types/habit';
+import { getTodayKey, getYesterdayKey, isHabitActiveToday, getLevel } from '@/types/habit';
 
 const HABITS_KEY = 'habits-app-habits';
 const PROGRESS_KEY = 'habits-app-progress';
@@ -19,6 +19,8 @@ function saveToStorage(key: string, data: unknown) {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
+const DEFAULT_STATS: UserStats = { totalXp: 0, level: 1, currentStreak: 0, lastCompletedDate: null };
+
 export function useHabits() {
   const [habits, setHabits] = useState<Habit[]>(() => loadFromStorage(HABITS_KEY, []));
   const [progress, setProgress] = useState<DayProgress>(() => {
@@ -29,15 +31,23 @@ export function useHabits() {
       totalXpEarned: 0,
       allCompleted: false,
     });
-    // Reset if different day
     if (saved.date !== today) {
       return { date: today, completedHabitIds: [], totalXpEarned: 0, allCompleted: false };
     }
     return saved;
   });
-  const [stats, setStats] = useState<UserStats>(() =>
-    loadFromStorage(STATS_KEY, { totalXp: 0, level: 1, currentStreak: 0 })
-  );
+  const [stats, setStats] = useState<UserStats>(() => {
+    const saved = loadFromStorage<UserStats>(STATS_KEY, DEFAULT_STATS);
+    // Check if streak should be reset (missed yesterday)
+    if (saved.lastCompletedDate) {
+      const yesterday = getYesterdayKey();
+      const today = getTodayKey();
+      if (saved.lastCompletedDate !== yesterday && saved.lastCompletedDate !== today) {
+        return { ...saved, currentStreak: 0 };
+      }
+    }
+    return { ...DEFAULT_STATS, ...saved };
+  });
   const [xpPopup, setXpPopup] = useState<{ amount: number; id: string } | null>(null);
   const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
 
@@ -69,11 +79,11 @@ export function useHabits() {
     if (!habit) return;
 
     setProgress(prev => {
-      const isCompleted = prev.completedHabitIds.includes(habitId);
+      const wasCompleted = prev.completedHabitIds.includes(habitId);
       let newCompleted: string[];
       let xpChange = 0;
 
-      if (isCompleted) {
+      if (wasCompleted) {
         newCompleted = prev.completedHabitIds.filter(id => id !== habitId);
         xpChange = -habit.xpReward;
       } else {
@@ -86,7 +96,6 @@ export function useHabits() {
       const activeHabits = habits.filter(isHabitActiveToday);
       const allDone = activeHabits.length > 0 && activeHabits.every(h => newCompleted.includes(h.id));
 
-      // Bonus XP for completing all
       let bonusXp = 0;
       if (allDone && !prev.allCompleted) {
         bonusXp = 50;
@@ -101,9 +110,31 @@ export function useHabits() {
         setTimeout(() => setCelebrationMessage(null), 4000);
       }
 
+      // Update stats with streak logic
       setStats(s => {
         const newXp = Math.max(0, s.totalXp + xpChange + bonusXp);
-        return { ...s, totalXp: newXp, level: getLevel(newXp) };
+        const today = getTodayKey();
+
+        let newStreak = s.currentStreak;
+        let newLastDate = s.lastCompletedDate;
+
+        if (allDone && !prev.allCompleted) {
+          // Just completed all habits today
+          if (s.lastCompletedDate === getYesterdayKey() || s.lastCompletedDate === today) {
+            newStreak = s.lastCompletedDate === today ? s.currentStreak : s.currentStreak + 1;
+          } else {
+            newStreak = 1; // Start new streak
+          }
+          newLastDate = today;
+        } else if (!allDone && prev.allCompleted) {
+          // Unchecked a habit, lost today's completion
+          if (s.lastCompletedDate === today) {
+            newStreak = Math.max(0, s.currentStreak - 1);
+            newLastDate = newStreak > 0 ? getYesterdayKey() : null;
+          }
+        }
+
+        return { totalXp: newXp, level: getLevel(newXp), currentStreak: newStreak, lastCompletedDate: newLastDate };
       });
 
       return {
@@ -114,6 +145,10 @@ export function useHabits() {
       };
     });
   }, [habits]);
+
+  const resetXp = useCallback(() => {
+    setStats({ totalXp: 0, level: 1, currentStreak: 0, lastCompletedDate: null });
+  }, []);
 
   const isCompleted = useCallback((habitId: string) => {
     return progress.completedHabitIds.includes(habitId);
@@ -131,6 +166,7 @@ export function useHabits() {
     addHabit,
     removeHabit,
     toggleHabit,
+    resetXp,
     isCompleted,
     completionPercentage,
     xpPopup,
