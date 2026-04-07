@@ -57,30 +57,50 @@ const Index = ({ profile }: IndexProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-lg border-b border-border/50 rounded-b-3xl">
-        <div className="mx-auto max-w-lg px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10">
-                <Sparkles className="w-5 h-5 text-primary" />
+      <header className="sticky top-0 z-10 overflow-hidden">
+        <div className="bg-gradient-to-br from-primary/90 via-primary/80 to-primary/70 backdrop-blur-xl rounded-b-[2rem] shadow-lg shadow-primary/10">
+          <div className="mx-auto max-w-lg px-5 pt-6 pb-5">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-primary-foreground/15 backdrop-blur-sm border border-primary-foreground/10">
+                  <Sparkles className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-primary-foreground/70 tracking-wide">
+                    {dayName}, {dateStr}
+                  </p>
+                  <h1 className="text-xl font-display font-bold text-primary-foreground leading-tight mt-0.5">
+                    {profile.name ? `${greeting}, ${profile.name} 👋` : `${greeting}!`}
+                  </h1>
+                </div>
               </div>
-              <div>
-                <h1 className="text-lg font-display font-bold text-foreground leading-tight">
-                  {profile.name ? `${greeting}, ${profile.name}` : 'Meus Hábitos'}
-                </h1>
-                <p className="text-xs text-muted-foreground">
-                  {dayName}, {dateStr}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/settings')}
+                className="rounded-xl hover:bg-primary-foreground/10 text-primary-foreground/70 hover:text-primary-foreground mt-0.5"
+              >
+                <Settings className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* Mini stats in header */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 rounded-xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 px-3.5 py-2.5">
+                <p className="text-[10px] font-medium text-primary-foreground/60 uppercase tracking-wider">Nível</p>
+                <p className="text-lg font-display font-bold text-primary-foreground leading-tight">{stats.level}</p>
+              </div>
+              <div className="flex-1 rounded-xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 px-3.5 py-2.5">
+                <p className="text-[10px] font-medium text-primary-foreground/60 uppercase tracking-wider">XP Total</p>
+                <p className="text-lg font-display font-bold text-primary-foreground leading-tight">{stats.totalXp}</p>
+              </div>
+              <div className="flex-1 rounded-xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 px-3.5 py-2.5">
+                <p className="text-[10px] font-medium text-primary-foreground/60 uppercase tracking-wider">Hoje</p>
+                <p className="text-lg font-display font-bold text-primary-foreground leading-tight">
+                  {todayHabits.length > 0 ? `${completedCount}/${todayHabits.length}` : '—'}
                 </p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate('/settings')}
-              className="rounded-xl hover:bg-muted"
-            >
-              <Settings className="w-5 h-5 text-muted-foreground" />
-            </Button>
           </div>
         </div>
       </header>
