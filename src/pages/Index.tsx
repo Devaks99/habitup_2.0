@@ -4,6 +4,7 @@ import { useHabits } from '@/hooks/useHabits';
 import { HabitCard } from '@/components/HabitCard';
 import { AddHabitDialog } from '@/components/AddHabitDialog';
 import { CelebrationBanner } from '@/components/CelebrationBanner';
+import { ShareProgressDialog } from '@/components/ShareProgressDialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Plus, Settings, Flame, Star, RotateCcw, ChevronDown, Calendar, Repeat, Trash2, Instagram, Github, Linkedin } from 'lucide-react';
@@ -255,6 +256,13 @@ const Index = ({ profile }: IndexProps) => {
             <div className="w-px h-3 bg-border" />
             <div className="text-[11px] text-muted-foreground">
               {habits.length} total
+            </div>
+            <div className="ml-auto">
+              <ShareProgressDialog
+                streak={stats.currentStreak}
+                level={stats.level}
+                totalXp={stats.totalXp}
+              />
             </div>
           </div>
         </motion.div>
