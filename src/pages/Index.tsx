@@ -6,7 +6,7 @@ import { AddHabitDialog } from '@/components/AddHabitDialog';
 import { CelebrationBanner } from '@/components/CelebrationBanner';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Settings, Flame, Star, RotateCcw, ChevronDown, Calendar, Repeat, Trash2 } from 'lucide-react';
+import { Plus, Settings, Flame, Star, RotateCcw, ChevronDown, Calendar, Repeat, Trash2, Instagram, Github, Linkedin } from 'lucide-react';
 import { getTodayWeekDay, getXpProgress, WEEKDAY_LABELS } from '@/types/habit';
 import mascotImg from '@/assets/mascote_habitup.png';
 import mascotCelebrationImg from '@/assets/mascote_comemoracao_habitup.png';
