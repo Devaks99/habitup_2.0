@@ -165,16 +165,13 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
               }} />
 
               {/* Brand */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                marginBottom: 20,
-              }}>
+              <div style={{ marginBottom: 40 }}>
                 <span style={{
-                  fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em',
+                  fontSize: 28, fontWeight: 700, letterSpacing: '-0.02em',
                   color: '#4a8c5c',
                 }}>Habit</span>
                 <span style={{
-                  fontSize: 14, fontWeight: 800, letterSpacing: '-0.02em',
+                  fontSize: 28, fontWeight: 800, letterSpacing: '-0.02em',
                   color: '#d4943a',
                 }}>Up</span>
               </div>
