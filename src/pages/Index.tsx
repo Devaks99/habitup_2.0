@@ -117,8 +117,8 @@ const Index = ({ profile }: IndexProps) => {
           transition={{ duration: 0.4 }}
           className={`rounded-2xl border p-5 transition-colors duration-500 ${
             hasStreak
-              ? 'bg-gradient-to-br from-accent/6 to-card border-accent/15'
-              : 'bg-card border-border'
+              ? 'bg-gradient-to-br from-accent/6 to-card border-accent/30'
+              : 'bg-card border-border/80'
           }`}
         >
           <div className="flex items-center gap-5">
