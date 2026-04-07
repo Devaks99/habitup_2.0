@@ -190,21 +190,21 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
 
               {/* Stats */}
               <div style={{
-                display: 'flex', alignItems: 'center', gap: 24,
-                marginBottom: 12,
+                display: 'flex', alignItems: 'center', gap: 60,
+                marginBottom: 24,
               }}>
                 {/* Streak */}
                 <div style={{ textAlign: 'center' }}>
                   <div style={{
-                    fontSize: 36, fontWeight: 800, lineHeight: 1,
+                    fontSize: 72, fontWeight: 800, lineHeight: 1,
                     color: '#2d2d2d', letterSpacing: '-0.03em',
                   }}>
                     {streak}
                   </div>
                   <div style={{
-                    fontSize: 10, fontWeight: 600, textTransform: 'uppercase' as const,
-                    letterSpacing: '0.1em', color: '#e67e22', marginTop: 4,
-                    display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'center',
+                    fontSize: 18, fontWeight: 600, textTransform: 'uppercase' as const,
+                    letterSpacing: '0.1em', color: '#e67e22', marginTop: 8,
+                    display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center',
                   }}>
                     🔥 dias
                   </div>
@@ -212,22 +212,22 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
 
                 {/* Divider */}
                 <div style={{
-                  width: 1, height: 40,
-                  background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.1), transparent)',
+                  width: 1, height: 70,
+                  background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.12), transparent)',
                 }} />
 
                 {/* Level */}
                 <div style={{ textAlign: 'center' }}>
                   <div style={{
-                    fontSize: 36, fontWeight: 800, lineHeight: 1,
+                    fontSize: 72, fontWeight: 800, lineHeight: 1,
                     color: '#2d2d2d', letterSpacing: '-0.03em',
                   }}>
                     {level}
                   </div>
                   <div style={{
-                    fontSize: 10, fontWeight: 600, textTransform: 'uppercase' as const,
-                    letterSpacing: '0.1em', color: '#4a8c5c', marginTop: 4,
-                    display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'center',
+                    fontSize: 18, fontWeight: 600, textTransform: 'uppercase' as const,
+                    letterSpacing: '0.1em', color: '#4a8c5c', marginTop: 8,
+                    display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center',
                   }}>
                     ⭐ nível
                   </div>
@@ -236,20 +236,20 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
 
               {/* XP */}
               <div style={{
-                fontSize: 11, fontWeight: 500, color: '#999',
-                marginTop: 2,
+                fontSize: 20, fontWeight: 500, color: '#999',
+                marginTop: 4,
               }}>
                 {totalXp} XP acumulados
               </div>
 
               {/* Footer */}
               <div style={{
-                marginTop: 16, paddingTop: 12,
+                marginTop: 32, paddingTop: 24,
                 borderTop: '1px solid rgba(0,0,0,0.05)',
                 width: '100%', textAlign: 'center' as const,
               }}>
                 <span style={{
-                  fontSize: 9, color: '#bbb', fontWeight: 500,
+                  fontSize: 16, color: '#bbb', fontWeight: 500,
                   letterSpacing: '0.05em',
                 }}>
                   Construindo hábitos, um dia de cada vez 💪
