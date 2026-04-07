@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHabits } from '@/hooks/useHabits';
 import { HabitCard } from '@/components/HabitCard';
@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Plus, Settings, Flame, Star, RotateCcw, ChevronDown, Calendar, Repeat, Trash2, Instagram, Github, Linkedin } from 'lucide-react';
 import { getTodayWeekDay, getXpProgress, WEEKDAY_LABELS } from '@/types/habit';
 import mascotImg from '@/assets/mascote_habitup.png';
+import mascotWavingImg from '@/assets/mascote_acenando_habitup.png';
 import mascotCelebrationImg from '@/assets/mascote_comemoracao_habitup.png';
 import type { UserProfile } from '@/types/userProfile';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,6 +46,12 @@ const Index = ({ profile }: IndexProps) => {
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showAllHabits, setShowAllHabits] = useState(false);
+  const [showWaving, setShowWaving] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowWaving(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
   const {
     habits,
     todayHabits,
@@ -147,15 +154,24 @@ const Index = ({ profile }: IndexProps) => {
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <motion.img
-                      src={completionPercentage === 100 ? mascotCelebrationImg : mascotImg}
-                      alt="HabitUp mascote"
-                      className="w-14 h-14 object-contain mb-0.5"
-                      key={completionPercentage === 100 ? 'celebration' : 'normal'}
-                      initial={{ scale: 0.5, opacity: 0 }}
-                      animate={{ scale: completionPercentage === 100 ? [0.5, 1.3, 1] : 1, opacity: 1 }}
-                      transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                    />
+                    <AnimatePresence mode="wait">
+                      <motion.img
+                        src={
+                          completionPercentage === 100
+                            ? mascotCelebrationImg
+                            : showWaving
+                              ? mascotWavingImg
+                              : mascotImg
+                        }
+                        alt="HabitUp mascote"
+                        className="w-14 h-14 object-contain mb-0.5"
+                        key={completionPercentage === 100 ? 'celebration' : showWaving ? 'waving' : 'normal'}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.8, opacity: 0 }}
+                        transition={{ duration: 0.5, ease: 'easeInOut' }}
+                      />
+                    </AnimatePresence>
                     <span className="text-[11px] font-display font-bold text-foreground leading-none">
                       {completionPercentage}%
                     </span>
