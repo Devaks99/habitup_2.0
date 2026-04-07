@@ -152,7 +152,7 @@ const Index = ({ profile }: IndexProps) => {
               </div>
             ) : (
               <div className="relative flex-shrink-0 w-[108px] h-[108px] flex items-center justify-center">
-                <span className="text-4xl">🌱</span>
+                <img src={mascotImg} alt="HabitUp mascote" className="w-20 h-20 object-contain" />
               </div>
             )}
 
