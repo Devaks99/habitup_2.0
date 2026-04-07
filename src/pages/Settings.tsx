@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Mail, FileText, Bell, Save } from 'lucide-react';
+import { ArrowLeft, Bell, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SettingsProps {
@@ -24,7 +24,7 @@ const Settings = ({ profile, onUpdate }: SettingsProps) => {
 
   const handleSave = () => {
     onUpdate(form);
-    toast.success('Configurações salvas com sucesso!');
+    toast.success('Configurações salvas!');
   };
 
   const hasChanges =
@@ -36,87 +36,84 @@ const Settings = ({ profile, onUpdate }: SettingsProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="pt-8 pb-2 px-4">
+      <header className="px-5 pt-10 pb-6">
         <div className="mx-auto max-w-lg">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate('/')}
-              className="rounded-xl hover:bg-muted w-8 h-8 -ml-2"
+              className="rounded-full hover:bg-muted w-9 h-9 -ml-1"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-[18px] h-[18px]" />
             </Button>
-            <h1 className="text-2xl font-display font-bold text-foreground">Configurações</h1>
+            <h1 className="text-[26px] font-display font-bold text-foreground tracking-tight">Configurações</h1>
           </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-lg px-4 pt-5 pb-24 space-y-5">
-        {/* Profile Section */}
-        <section className="rounded-2xl bg-card border border-border p-6 space-y-5">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-              Perfil
-            </h2>
-          </div>
+      <div className="mx-auto max-w-lg px-5 pb-24 space-y-5">
+        {/* Profile */}
+        <section className="rounded-2xl bg-card border border-border p-5 space-y-4">
+          <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-widest">
+            Perfil
+          </h2>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm text-foreground">Nome</Label>
+          <div className="space-y-3.5">
+            <div className="space-y-1.5">
+              <Label htmlFor="name" className="text-xs text-muted-foreground">Nome</Label>
               <Input
                 id="name"
                 placeholder="Seu nome (opcional)"
                 value={form.name}
                 onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
-                className="rounded-xl bg-background border-border"
+                className="rounded-xl bg-background border-border h-10"
                 maxLength={100}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm text-foreground">E-mail</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs text-muted-foreground">E-mail</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="seu@email.com (opcional)"
                 value={form.email}
                 onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))}
-                className="rounded-xl bg-background border-border"
+                className="rounded-xl bg-background border-border h-10"
                 maxLength={255}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="bio" className="text-sm text-foreground">Bio</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="bio" className="text-xs text-muted-foreground">Bio</Label>
               <Textarea
                 id="bio"
-                placeholder="Conte um pouco sobre você... (opcional)"
+                placeholder="Uma frase sobre você... (opcional)"
                 value={form.bio}
                 onChange={(e) => setForm(prev => ({ ...prev, bio: e.target.value }))}
-                className="rounded-xl bg-background border-border resize-none min-h-[80px]"
+                className="rounded-xl bg-background border-border resize-none min-h-[72px]"
                 maxLength={300}
               />
-              <p className="text-xs text-muted-foreground text-right">{form.bio.length}/300</p>
+              <p className="text-[10px] text-muted-foreground/50 text-right">{form.bio.length}/300</p>
             </div>
           </div>
         </section>
 
-        {/* Notifications Section */}
-        <section className="rounded-2xl bg-card border border-border p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Bell className="w-4 h-4 text-primary" />
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-              Notificações
-            </h2>
-          </div>
+        {/* Notifications */}
+        <section className="rounded-2xl bg-card border border-border p-5 space-y-3.5">
+          <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-widest">
+            Notificações
+          </h2>
 
           <div className="flex items-center justify-between gap-4">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">Alerta de hábitos pendentes</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Receba um e-mail às 22h quando houver hábitos não concluídos.
+            <div className="space-y-0.5 flex-1">
+              <div className="flex items-center gap-1.5">
+                <Bell className="w-3.5 h-3.5 text-muted-foreground" />
+                <p className="text-sm font-medium text-foreground">Lembrete diário</p>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                E-mail às 22h com hábitos pendentes
               </p>
             </div>
             <Switch
@@ -126,20 +123,20 @@ const Settings = ({ profile, onUpdate }: SettingsProps) => {
             />
           </div>
           {!form.email && (
-            <p className="text-xs text-muted-foreground/60 italic">
-              Informe seu e-mail para ativar as notificações.
+            <p className="text-[10px] text-muted-foreground/50 italic">
+              Adicione um e-mail para ativar notificações.
             </p>
           )}
         </section>
 
-        {/* Save Button */}
+        {/* Save */}
         <Button
           onClick={handleSave}
           disabled={!hasChanges}
-          className="w-full rounded-xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base font-medium"
+          className="w-full rounded-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-11 text-sm font-medium"
         >
           <Save className="w-4 h-4" />
-          Salvar alterações
+          Salvar
         </Button>
       </div>
     </div>

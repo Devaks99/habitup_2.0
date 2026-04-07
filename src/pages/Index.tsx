@@ -4,7 +4,6 @@ import { useHabits } from '@/hooks/useHabits';
 import { HabitCard } from '@/components/HabitCard';
 import { AddHabitDialog } from '@/components/AddHabitDialog';
 import { CelebrationBanner } from '@/components/CelebrationBanner';
-import { DailyProgress } from '@/components/DailyProgress';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Plus, Settings, Flame, Star, RotateCcw } from 'lucide-react';
@@ -39,6 +38,14 @@ function getGreeting(): string {
   return 'Boa noite';
 }
 
+function getMotivationalText(percentage: number, hasStreak: boolean): string {
+  if (percentage === 100) return 'Dia perfeito! 🏆';
+  if (percentage >= 75) return 'Quase lá, continue!';
+  if (percentage >= 50) return 'Bom progresso!';
+  if (hasStreak) return 'Mantenha sua sequência!';
+  return 'Vamos começar o dia!';
+}
+
 interface IndexProps {
   profile: UserProfile;
 }
@@ -67,162 +74,198 @@ const Index = ({ profile }: IndexProps) => {
   const xpProgress = getXpProgress(stats.totalXp);
   const hasStreak = stats.currentStreak > 0;
 
+  // SVG circle progress
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const progressOffset = circumference - (completionPercentage / 100) * circumference;
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header — clean & minimal */}
-      <header className="pt-8 pb-2 px-4">
+      {/* Header */}
+      <header className="px-5 pt-10 pb-6">
         <div className="mx-auto max-w-lg">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-xs font-medium text-muted-foreground tracking-wide">
-              {dayName}, {dateStr}
-            </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-[13px] text-muted-foreground mb-0.5">
+                {dayName}, {dateStr}
+              </p>
+              <h1 className="text-[26px] font-display font-bold text-foreground leading-tight tracking-tight">
+                {profile.name ? `${greeting}, ${profile.name}` : `${greeting}!`}
+              </h1>
+            </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate('/settings')}
-              className="rounded-xl hover:bg-muted -mr-2 w-8 h-8"
+              className="rounded-full hover:bg-muted w-9 h-9 mt-1"
             >
-              <Settings className="w-4 h-4 text-muted-foreground" />
+              <Settings className="w-[18px] h-[18px] text-muted-foreground" />
             </Button>
           </div>
-          <h1 className="text-2xl font-display font-bold text-foreground leading-tight">
-            {profile.name ? `${greeting}, ${profile.name}` : `${greeting}!`}
-          </h1>
         </div>
       </header>
 
-      <div className="mx-auto max-w-lg px-4 pt-5 pb-24 space-y-5">
-        {/* Streak + XP card */}
-        <div className={`rounded-2xl border p-5 transition-all duration-500 ${
-          hasStreak
-            ? 'bg-gradient-to-br from-accent/8 via-card to-card border-accent/25 shadow-sm shadow-accent/5'
-            : 'bg-card border-border'
-        }`}>
-          <div className="flex items-center justify-between mb-4">
-            {/* Streak */}
-            <div className="flex items-center gap-3">
-              <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-500 ${
-                hasStreak ? 'bg-accent/15' : 'bg-muted'
-              }`}>
-                <Flame className={`w-5 h-5 transition-colors duration-500 ${
-                  hasStreak ? 'text-accent' : 'text-muted-foreground'
-                }`} />
-              </div>
-              <div>
-                <p className={`text-2xl font-display font-bold leading-none ${
-                  hasStreak ? 'text-accent' : 'text-muted-foreground'
-                }`}>
-                  {stats.currentStreak}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {stats.currentStreak === 1 ? 'dia de sequência' : 'dias de sequência'}
-                </p>
-              </div>
-            </div>
-
-            {/* Level + XP */}
-            <div className="text-right">
-              <div className="flex items-center gap-1.5 justify-end">
-                <Star className="w-4 h-4 text-xp" />
-                <p className="text-sm font-display font-bold text-foreground">Nível {stats.level}</p>
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5">{stats.totalXp} XP</p>
-            </div>
-          </div>
-
-          {/* XP progress bar */}
-          <div className="space-y-1.5">
-            <Progress value={xpProgress} className="h-2 bg-secondary [&>div]:bg-xp" />
-            <div className="flex justify-between">
-              <p className="text-[10px] text-muted-foreground">{xpProgress}/100 XP</p>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button className="text-[10px] text-muted-foreground/50 hover:text-destructive transition-colors flex items-center gap-0.5">
-                    <RotateCcw className="w-2.5 h-2.5" />
-                    resetar
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-2xl">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="font-display">Resetar progresso?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Isso irá zerar seu XP, nível e sequência. Seus hábitos serão mantidos. Esta ação não pode ser desfeita.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={resetXp}
-                      className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Confirmar reset
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </div>
-        </div>
-
-        {/* Daily progress */}
+      <div className="mx-auto max-w-lg px-5 pb-28 space-y-6">
+        {/* Progress hero — circular progress + stats */}
         {todayHabits.length > 0 && (
-          <DailyProgress
-            percentage={completionPercentage}
-            completed={completedCount}
-            total={todayHabits.length}
-          />
+          <div className={`rounded-3xl border p-6 transition-all duration-500 ${
+            hasStreak
+              ? 'bg-gradient-to-br from-accent/6 to-card border-accent/15'
+              : 'bg-card border-border'
+          }`}>
+            <div className="flex items-center gap-6">
+              {/* Circular progress */}
+              <div className="relative flex-shrink-0">
+                <svg width="128" height="128" className="transform -rotate-90">
+                  <circle
+                    cx="64" cy="64" r={radius}
+                    fill="none"
+                    stroke="hsl(var(--secondary))"
+                    strokeWidth="8"
+                  />
+                  <circle
+                    cx="64" cy="64" r={radius}
+                    fill="none"
+                    stroke={completionPercentage === 100 ? 'hsl(var(--success))' : 'hsl(var(--primary))'}
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={progressOffset}
+                    className="transition-all duration-700 ease-out"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-3xl font-display font-bold text-foreground leading-none">
+                    {completionPercentage}%
+                  </span>
+                  <span className="text-[10px] text-muted-foreground mt-1">
+                    {completedCount}/{todayHabits.length}
+                  </span>
+                </div>
+              </div>
+
+              {/* Right side — streak, xp, motivational */}
+              <div className="flex-1 min-w-0 space-y-3">
+                <p className="text-sm text-muted-foreground leading-snug">
+                  {getMotivationalText(completionPercentage, hasStreak)}
+                </p>
+
+                {/* Streak pill */}
+                <div className="flex items-center gap-2">
+                  <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-500 ${
+                    hasStreak
+                      ? 'bg-accent/15 text-accent'
+                      : 'bg-muted text-muted-foreground'
+                  }`}>
+                    <Flame className="w-3.5 h-3.5" />
+                    {stats.currentStreak} {stats.currentStreak === 1 ? 'dia' : 'dias'}
+                  </div>
+                </div>
+
+                {/* XP bar */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-3 h-3 text-xp" />
+                      <span className="text-[11px] font-semibold text-foreground">Nv. {stats.level}</span>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">{xpProgress}/100</span>
+                  </div>
+                  <Progress value={xpProgress} className="h-1.5 bg-secondary [&>div]:bg-xp" />
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Celebration */}
         <CelebrationBanner message={celebrationMessage} />
 
-        {/* Habits */}
+        {/* Habits list */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-widest">
               Hábitos de hoje
             </h2>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setDialogOpen(true)}
-              className="text-primary hover:text-primary/80 hover:bg-primary/5 gap-1.5 rounded-xl"
+              className="text-primary hover:text-primary/80 hover:bg-primary/5 gap-1.5 rounded-full h-8 px-3 text-xs"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               Novo
             </Button>
           </div>
 
           {todayHabits.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border p-10 text-center">
-              <p className="text-4xl mb-3">🌱</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Nenhum hábito cadastrado ainda.<br />
+            <div className="rounded-3xl border border-dashed border-border p-12 text-center">
+              <p className="text-5xl mb-4">🌱</p>
+              <p className="text-sm text-muted-foreground mb-1 font-medium">
+                Nenhum hábito ainda
+              </p>
+              <p className="text-xs text-muted-foreground/70 mb-5">
                 Comece adicionando seu primeiro hábito!
               </p>
               <Button
                 onClick={() => setDialogOpen(true)}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl gap-2"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full gap-2 h-10 px-5"
               >
                 <Plus className="w-4 h-4" />
                 Adicionar hábito
               </Button>
             </div>
           ) : (
-            <div className="space-y-2.5">
-              {todayHabits.map(habit => (
-                <HabitCard
+            <div className="space-y-2">
+              {todayHabits.map((habit, i) => (
+                <div
                   key={habit.id}
-                  habit={habit}
-                  completed={isCompleted(habit.id)}
-                  onToggle={() => toggleHabit(habit.id)}
-                  onRemove={() => removeHabit(habit.id)}
-                  xpPopup={xpPopup}
-                />
+                  className="animate-in fade-in slide-in-from-bottom-2"
+                  style={{ animationDelay: `${i * 50}ms`, animationFillMode: 'both' }}
+                >
+                  <HabitCard
+                    habit={habit}
+                    completed={isCompleted(habit.id)}
+                    onToggle={() => toggleHabit(habit.id)}
+                    onRemove={() => removeHabit(habit.id)}
+                    xpPopup={xpPopup}
+                  />
+                </div>
               ))}
             </div>
           )}
         </section>
+
+        {/* Reset — subtle, at the bottom */}
+        {stats.totalXp > 0 && (
+          <div className="flex justify-center pt-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="text-[11px] text-muted-foreground/40 hover:text-destructive/70 transition-colors flex items-center gap-1 py-2 px-3 rounded-full hover:bg-destructive/5">
+                  <RotateCcw className="w-3 h-3" />
+                  Resetar progresso
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="rounded-2xl max-w-sm">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="font-display">Resetar tudo?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Seu XP, nível e sequência serão zerados. Os hábitos cadastrados serão mantidos. Esta ação não pode ser desfeita.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={resetXp}
+                    className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Confirmar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
       </div>
 
       <AddHabitDialog open={dialogOpen} onOpenChange={setDialogOpen} onAdd={addHabit} />
