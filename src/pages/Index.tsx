@@ -163,8 +163,8 @@ const Index = ({ profile }: IndexProps) => {
                     alt="HabitUp mascote"
                     className="w-24 h-24 object-contain"
                     initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1, y: [0, -4, 0] }}
-                    transition={{ scale: { type: 'spring', stiffness: 200, damping: 15 }, y: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' } }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                   />
                 </div>
               )}
