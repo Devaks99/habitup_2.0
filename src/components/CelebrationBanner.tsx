@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import mascotImg from '@/assets/mascote_habitup.png';
+import mascotCoolImg from '@/assets/mascote_oculos_escuro_habitup.png';
 
 interface CelebrationBannerProps {
   message: string | null;
