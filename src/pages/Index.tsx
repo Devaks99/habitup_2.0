@@ -80,15 +80,10 @@ const Index = ({ profile }: IndexProps) => {
       <header className="px-5 pt-8 pb-5">
         <div className="mx-auto max-w-lg">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5">
-              <motion.img
-                src={mascotImg}
-                alt="HabitUp mascote"
-                className="w-10 h-10 object-contain"
-                initial={{ scale: 0, rotate: -20 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
-              />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-display font-bold text-sm">H</span>
+              </div>
               <span className="font-display font-bold text-foreground text-lg tracking-tight">HabitUp</span>
             </div>
             <Button
