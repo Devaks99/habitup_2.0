@@ -49,7 +49,7 @@ const Index = ({ profile }: IndexProps) => {
   const [showWaving, setShowWaving] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowWaving(false), 3000);
+    const timer = setTimeout(() => setShowWaving(false), 6000);
     return () => clearTimeout(timer);
   }, []);
   const {
