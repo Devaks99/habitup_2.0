@@ -131,7 +131,7 @@ const Index = ({ profile }: IndexProps) => {
         >
           <div className="flex items-center gap-5">
             {/* Circular progress */}
-            <div className="relative flex-shrink-0">
+            <div className="relative flex-shrink-0 -ml-1">
               {todayHabits.length > 0 ? (
                 <>
                   <svg width="120" height="120" className="transform -rotate-90">
