@@ -146,7 +146,7 @@ const Index = ({ profile }: IndexProps) => {
                     <motion.img
                       src={completionPercentage === 100 ? mascotCelebrationImg : mascotImg}
                       alt="HabitUp mascote"
-                      className="w-12 h-12 object-contain mb-0.5"
+                      className="w-14 h-14 object-contain mb-0.5"
                       key={completionPercentage === 100 ? 'celebration' : 'normal'}
                       initial={{ scale: 0.5, opacity: 0 }}
                       animate={{ scale: completionPercentage === 100 ? [0.5, 1.3, 1] : 1, opacity: 1 }}
