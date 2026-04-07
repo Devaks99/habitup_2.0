@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useHabits } from '@/hooks/useHabits';
 import { XpBar } from '@/components/XpBar';
 import { HabitCard } from '@/components/HabitCard';
@@ -6,8 +7,9 @@ import { AddHabitDialog } from '@/components/AddHabitDialog';
 import { CelebrationBanner } from '@/components/CelebrationBanner';
 import { DailyProgress } from '@/components/DailyProgress';
 import { Button } from '@/components/ui/button';
-import { Plus, Sparkles } from 'lucide-react';
+import { Plus, Sparkles, Settings } from 'lucide-react';
 import { WEEKDAY_LABELS, getTodayWeekDay } from '@/types/habit';
+import type { UserProfile } from '@/types/userProfile';
 
 const WEEKDAY_FULL: Record<string, string> = {
   mon: 'Segunda-feira',
@@ -19,7 +21,19 @@ const WEEKDAY_FULL: Record<string, string> = {
   sun: 'Domingo',
 };
 
-const Index = () => {
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Bom dia';
+  if (hour < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+
+interface IndexProps {
+  profile: UserProfile;
+}
+
+const Index = ({ profile }: IndexProps) => {
+  const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const {
     todayHabits,
@@ -31,7 +45,6 @@ const Index = () => {
     completionPercentage,
     xpPopup,
     celebrationMessage,
-    progress,
   } = useHabits();
 
   const today = new Date();
@@ -39,23 +52,42 @@ const Index = () => {
   const dateStr = today.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
 
   const completedCount = todayHabits.filter(h => isCompleted(h.id)).length;
+  const greeting = getGreeting();
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-lg px-4 py-8 pb-24">
-        {/* Header */}
-        <header className="mb-8">
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-5 h-5 text-xp" />
-            <h1 className="text-2xl font-display font-bold text-foreground">Hábitos</h1>
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-lg border-b border-border/50 rounded-b-3xl">
+        <div className="mx-auto max-w-lg px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-lg font-display font-bold text-foreground leading-tight">
+                  {profile.name ? `${greeting}, ${profile.name}` : 'Meus Hábitos'}
+                </h1>
+                <p className="text-xs text-muted-foreground">
+                  {dayName}, {dateStr}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/settings')}
+              className="rounded-xl hover:bg-muted"
+            >
+              <Settings className="w-5 h-5 text-muted-foreground" />
+            </Button>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {dayName}, {dateStr}
-          </p>
-        </header>
+        </div>
+      </header>
 
+      <div className="mx-auto max-w-lg px-4 py-6 pb-24 space-y-5">
         {/* Stats */}
-        <div className="space-y-3 mb-6">
+        <div className="space-y-3">
           <XpBar stats={stats} />
           {todayHabits.length > 0 && (
             <DailyProgress
@@ -67,9 +99,7 @@ const Index = () => {
         </div>
 
         {/* Celebration */}
-        <div className="mb-6">
-          <CelebrationBanner message={celebrationMessage} />
-        </div>
+        <CelebrationBanner message={celebrationMessage} />
 
         {/* Habits */}
         <section>

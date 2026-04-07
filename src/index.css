@@ -136,4 +136,9 @@
   .celebration-pulse {
     animation: celebrationPulse 0.6s ease-in-out;
   }
+
+  .rounded-b-3xl {
+    border-bottom-left-radius: 1.5rem;
+    border-bottom-right-radius: 1.5rem;
+  }
 }
