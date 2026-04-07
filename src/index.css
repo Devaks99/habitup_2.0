@@ -15,8 +15,10 @@
     --popover: 40 25% 99%;
     --popover-foreground: 30 10% 15%;
 
-    --primary: 152 35% 28%;
+    --primary: 152 40% 38%;
     --primary-foreground: 40 20% 97%;
+
+    --header-bg: 150 20% 96%;
 
     --secondary: 38 30% 93%;
     --secondary-foreground: 30 10% 25%;
