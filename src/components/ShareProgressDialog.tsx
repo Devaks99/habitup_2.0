@@ -184,8 +184,8 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
                 src={mascot.src}
                 alt="Mascote"
                 style={{
-                  width: 72, height: 72, objectFit: 'contain',
-                  marginBottom: 16,
+                  width: 96, height: 96, objectFit: 'contain',
+                  marginBottom: 20,
                   filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.08))',
                 }}
                 crossOrigin="anonymous"
