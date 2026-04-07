@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import mascotImg from '@/assets/mascote_habitup.png';
+import mascotCoolImg from '@/assets/mascote_oculos_escuro_habitup.png';
 
 interface CelebrationBannerProps {
   message: string | null;
@@ -17,7 +17,7 @@ export function CelebrationBanner({ message }: CelebrationBannerProps) {
           className="rounded-2xl bg-success/8 border border-success/15 px-5 py-4 flex items-center gap-3"
         >
           <motion.img
-            src={mascotImg}
+            src={mascotCoolImg}
             alt="HabitUp celebrando"
             className="w-12 h-12 object-contain flex-shrink-0"
             initial={{ scale: 0, rotate: -30 }}
