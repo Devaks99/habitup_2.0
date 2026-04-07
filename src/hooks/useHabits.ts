@@ -108,7 +108,7 @@ export function useHabits() {
           '🏆 Campeão! Continue assim!',
         ];
         setCelebrationMessage(msgs[Math.floor(Math.random() * msgs.length)]);
-        setTimeout(() => setCelebrationMessage(null), 4000);
+        setTimeout(() => setCelebrationMessage(null), 8000);
       }
 
       // Update stats with streak logic
