@@ -47,10 +47,17 @@ const Index = ({ profile }: IndexProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showAllHabits, setShowAllHabits] = useState(false);
   const [showWaving, setShowWaving] = useState(true);
+  const wavingTimerRef = React.useRef<ReturnType<typeof setTimeout>>();
+
+  const triggerWaving = () => {
+    clearTimeout(wavingTimerRef.current);
+    setShowWaving(true);
+    wavingTimerRef.current = setTimeout(() => setShowWaving(false), 6000);
+  };
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowWaving(false), 6000);
-    return () => clearTimeout(timer);
+    wavingTimerRef.current = setTimeout(() => setShowWaving(false), 6000);
+    return () => clearTimeout(wavingTimerRef.current);
   }, []);
   const {
     habits,
