@@ -249,7 +249,7 @@ const Index = ({ profile }: IndexProps) => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="rounded-2xl border border-dashed border-border/80 p-10 text-center"
+              className="rounded-2xl border-2 border-dashed border-border/80 p-10 text-center"
             >
               <p className="text-sm text-muted-foreground mb-1 font-medium">Nenhum hábito para hoje</p>
               <p className="text-xs text-muted-foreground/60 mb-4">Crie hábitos diários ou programados!</p>
