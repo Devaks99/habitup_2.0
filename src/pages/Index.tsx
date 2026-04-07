@@ -70,7 +70,7 @@ const Index = ({ profile }: IndexProps) => {
   const scheduledHabits = habits.filter(h => h.type === 'scheduled');
 
   // SVG circle
-  const radius = 46;
+  const radius = 52;
   const circumference = 2 * Math.PI * radius;
   const progressOffset = circumference - (completionPercentage / 100) * circumference;
 
@@ -80,10 +80,15 @@ const Index = ({ profile }: IndexProps) => {
       <header className="px-5 pt-8 pb-5">
         <div className="mx-auto max-w-lg">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-display font-bold text-sm">H</span>
-              </div>
+            <div className="flex items-center gap-2.5">
+              <motion.img
+                src={mascotImg}
+                alt="HabitUp mascote"
+                className="w-10 h-10 object-contain"
+                initial={{ scale: 0, rotate: -20 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
+              />
               <span className="font-display font-bold text-foreground text-lg tracking-tight">HabitUp</span>
             </div>
             <Button
@@ -120,41 +125,54 @@ const Index = ({ profile }: IndexProps) => {
         >
           <div className="flex items-center gap-5">
             {/* Circular progress */}
-            {todayHabits.length > 0 ? (
-              <div className="relative flex-shrink-0">
-                <svg width="108" height="108" className="transform -rotate-90">
-                  <circle
-                    cx="54" cy="54" r={radius}
-                    fill="none"
-                    stroke="hsl(var(--secondary))"
-                    strokeWidth="7"
+            <div className="relative flex-shrink-0">
+              {todayHabits.length > 0 ? (
+                <>
+                  <svg width="120" height="120" className="transform -rotate-90">
+                    <circle
+                      cx="60" cy="60" r={radius}
+                      fill="none"
+                      stroke="hsl(var(--secondary))"
+                      strokeWidth="7"
+                    />
+                    <motion.circle
+                      cx="60" cy="60" r={radius}
+                      fill="none"
+                      stroke={completionPercentage === 100 ? 'hsl(var(--success))' : 'hsl(var(--primary))'}
+                      strokeWidth="7"
+                      strokeLinecap="round"
+                      strokeDasharray={circumference}
+                      initial={{ strokeDashoffset: circumference }}
+                      animate={{ strokeDashoffset: progressOffset }}
+                      transition={{ duration: 0.8, ease: 'easeOut' }}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <motion.img
+                      src={mascotImg}
+                      alt="HabitUp mascote"
+                      className="w-12 h-12 object-contain mb-0.5"
+                      animate={{ y: [0, -3, 0] }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                    <span className="text-[11px] font-display font-bold text-foreground leading-none">
+                      {completionPercentage}%
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="w-[120px] h-[120px] flex items-center justify-center">
+                  <motion.img
+                    src={mascotImg}
+                    alt="HabitUp mascote"
+                    className="w-24 h-24 object-contain"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1, y: [0, -4, 0] }}
+                    transition={{ scale: { type: 'spring', stiffness: 200, damping: 15 }, y: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' } }}
                   />
-                  <motion.circle
-                    cx="54" cy="54" r={radius}
-                    fill="none"
-                    stroke={completionPercentage === 100 ? 'hsl(var(--success))' : 'hsl(var(--primary))'}
-                    strokeWidth="7"
-                    strokeLinecap="round"
-                    strokeDasharray={circumference}
-                    initial={{ strokeDashoffset: circumference }}
-                    animate={{ strokeDashoffset: progressOffset }}
-                    transition={{ duration: 0.8, ease: 'easeOut' }}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-display font-bold text-foreground leading-none">
-                    {completionPercentage}%
-                  </span>
-                  <span className="text-[10px] text-muted-foreground mt-0.5">
-                    {completedCount}/{todayHabits.length}
-                  </span>
                 </div>
-              </div>
-            ) : (
-              <div className="relative flex-shrink-0 w-[108px] h-[108px] flex items-center justify-center">
-                <img src={mascotImg} alt="HabitUp mascote" className="w-20 h-20 object-contain" />
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Stats column */}
             <div className="flex-1 min-w-0 space-y-2.5">
