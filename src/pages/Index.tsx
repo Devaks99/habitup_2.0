@@ -78,32 +78,33 @@ const Index = ({ profile }: IndexProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="relative z-10 bg-[#8fbc8f36] px-5 pt-8 pb-8 rounded-b-[2rem] shadow-[0_4px_20px_-6px_hsl(var(--foreground)/0.07),0_1px_4px_-2px_hsl(var(--foreground)/0.04)]">
+      <header className="relative z-10 px-5 pt-10 pb-7 rounded-b-[2.5rem] bg-gradient-to-b from-[#8fbc8f20] to-[#8fbc8f08] backdrop-blur-sm border-b border-border/30">
         <div className="mx-auto max-w-lg">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <span className="font-display font-extrabold text-xl tracking-tight">
-                <span className="text-primary">Habit</span><span className="text-accent">Up</span>
-              </span>
-            </div>
+          {/* Top row: Brand + Settings */}
+          <div className="flex items-center justify-between mb-6">
+            <span className="font-display font-bold text-[17px] tracking-tight text-foreground/80">
+              <span className="text-primary">Habit</span><span className="text-accent font-extrabold">Up</span>
+            </span>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate('/settings')}
-              className="rounded-full hover:bg-white/60 w-9 h-9"
+              className="rounded-full hover:bg-foreground/5 active:bg-foreground/10 w-8 h-8 transition-colors"
             >
-              <Settings className="w-[18px] h-[18px] text-foreground/50" />
+              <Settings className="w-4 h-4 text-foreground/40" />
             </Button>
           </div>
-          <div>
-            <p className="text-[13px] text-foreground/50 font-medium">
-              {dayName}, {dateStr}
-            </p>
-            <h1 className="text-[22px] font-display font-bold text-foreground leading-tight tracking-tight mt-0.5">
+
+          {/* Greeting block */}
+          <div className="space-y-1">
+            <h1 className="text-[26px] font-display font-bold text-foreground leading-none tracking-tight">
               {profile.name ? `${greeting}, ${profile.name}` : `${greeting}!`}
             </h1>
+            <p className="text-[13px] text-foreground/40 font-normal tracking-wide">
+              {dayName}, {dateStr}
+            </p>
             {profile.bio && (
-              <p className="text-[12px] text-foreground/45 mt-0.5 leading-snug">{profile.bio}</p>
+              <p className="text-[12px] text-foreground/35 leading-relaxed pt-0.5">{profile.bio}</p>
             )}
           </div>
         </div>
