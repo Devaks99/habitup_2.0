@@ -102,6 +102,9 @@ const Index = ({ profile }: IndexProps) => {
             <h1 className="text-[22px] font-display font-bold text-foreground leading-tight tracking-tight mt-0.5">
               {profile.name ? `${greeting}, ${profile.name}` : `${greeting}!`}
             </h1>
+            {profile.bio && (
+              <p className="text-[12px] text-muted-foreground/70 mt-0.5 leading-snug">{profile.bio}</p>
+            )}
           </div>
         </div>
       </header>
