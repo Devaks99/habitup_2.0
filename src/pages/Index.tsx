@@ -81,11 +81,10 @@ const Index = ({ profile }: IndexProps) => {
       <header className="px-5 pt-8 pb-5">
         <div className="mx-auto max-w-lg">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-display font-bold text-sm">H</span>
-              </div>
-              <span className="font-display font-bold text-foreground text-lg tracking-tight">HabitUp</span>
+            <div className="flex items-center">
+              <span className="font-display font-extrabold text-xl tracking-tight">
+                <span className="text-primary">Habit</span><span className="text-accent">Up</span>
+              </span>
             </div>
             <Button
               variant="ghost"
