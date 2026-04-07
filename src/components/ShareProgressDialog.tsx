@@ -135,12 +135,12 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
 
         {/* Card preview */}
         <div className="px-5 pb-4 flex justify-center">
-          <div className="rounded-2xl overflow-hidden shadow-lg border border-border/50 inline-block">
+          <div className="rounded-2xl overflow-hidden shadow-lg border border-border/50 w-full max-w-[360px] aspect-square">
             <div
               ref={cardRef}
               style={{
-                width: 360,
-                height: 360,
+                width: '100%',
+                aspectRatio: '1 / 1',
                 background: 'linear-gradient(145deg, #e8f5e8 0%, #f0f7e8 30%, #fdf8ef 60%, #fff9f0 100%)',
                 display: 'flex',
                 flexDirection: 'column',
