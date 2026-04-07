@@ -146,7 +146,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '32px 28px 24px',
+                padding: '36px 28px 26px',
                 position: 'relative',
                 overflow: 'hidden',
                 fontFamily: "'Space Grotesk', 'Inter', sans-serif",
