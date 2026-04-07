@@ -134,24 +134,23 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
         </div>
 
         {/* Card preview */}
-        <div className="px-5 pb-4 flex justify-center">
-          <div className="rounded-2xl overflow-hidden shadow-lg border border-border/50 w-full max-w-[360px] aspect-square">
+        <div className="px-4 sm:px-5 pb-4 flex justify-center">
+          <div className="rounded-2xl overflow-hidden shadow-lg border border-border/50 w-full max-w-sm aspect-[4/5] sm:aspect-square">
             <div
               ref={cardRef}
               style={{
                 width: '100%',
-                aspectRatio: '1 / 1',
+                height: '100%',
                 background: 'linear-gradient(145deg, #e8f5e8 0%, #f0f7e8 30%, #fdf8ef 60%, #fff9f0 100%)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '28px 24px 22px',
+                padding: 'clamp(20px, 5vw, 28px) clamp(16px, 4vw, 24px)',
                 position: 'relative',
                 overflow: 'hidden',
                 fontFamily: "'Space Grotesk', 'Inter', sans-serif",
-              }}
-            >
+              }}>
               {/* Decorative circles */}
               <div style={{
                 position: 'absolute', top: -30, right: -30,

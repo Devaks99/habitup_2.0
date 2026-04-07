@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-
-const EMOJI_OPTIONS = ['📚', '💪', '🧘', '🏃', '💧', '🍎', '😴', '✍️', '🎯', '🧠', '💊', '🌅', '🎵', '🧹', '💰', '📱'];
+import { ExpandEmojis } from './ExpandEmojis';
 
 interface AddHabitDialogProps {
   open: boolean;
@@ -49,7 +48,7 @@ export function AddHabitDialog({ open, onOpenChange, onAdd }: AddHabitDialogProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-[90vw] mx-auto my-4 rounded-2xl p-6 sm:max-w-md sm:p-6 sm:mx-0">
         <DialogHeader>
           <DialogTitle className="font-display">Novo Hábito</DialogTitle>
           <DialogDescription>Crie um hábito para acompanhar diariamente.</DialogDescription>
@@ -70,22 +69,7 @@ export function AddHabitDialog({ open, onOpenChange, onAdd }: AddHabitDialogProp
           {/* Emoji */}
           <div className="space-y-2">
             <Label className="text-xs uppercase tracking-wider text-muted-foreground">Ícone</Label>
-            <div className="flex flex-wrap gap-2">
-              {EMOJI_OPTIONS.map(e => (
-                <button
-                  key={e}
-                  onClick={() => setEmoji(e)}
-                  className={cn(
-                    "w-10 h-10 rounded-xl text-lg flex items-center justify-center transition-all",
-                    emoji === e
-                      ? "bg-primary/15 ring-2 ring-primary scale-110"
-                      : "bg-secondary hover:bg-secondary/80"
-                  )}
-                >
-                  {e}
-                </button>
-              ))}
-            </div>
+            <ExpandEmojis selectedEmoji={emoji} onEmojiSelect={setEmoji} />
           </div>
 
           {/* Type */}
@@ -121,13 +105,13 @@ export function AddHabitDialog({ open, onOpenChange, onAdd }: AddHabitDialogProp
           {type === 'scheduled' && (
             <div className="space-y-2">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Dias da semana</Label>
-              <div className="flex gap-1.5">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {WEEKDAYS.map(day => (
                   <button
                     key={day}
                     onClick={() => toggleDay(day)}
                     className={cn(
-                      "flex-1 py-2 rounded-lg text-xs font-medium transition-all",
+                      "flex-1 sm:flex-none py-2.5 px-2 sm:py-2 rounded-lg text-xs font-medium transition-all min-w-[38px]",
                       selectedDays.includes(day)
                         ? "bg-primary text-primary-foreground"
                         : "bg-secondary text-muted-foreground hover:text-foreground"
@@ -166,7 +150,7 @@ export function AddHabitDialog({ open, onOpenChange, onAdd }: AddHabitDialogProp
           <Button
             onClick={handleSubmit}
             disabled={!name.trim() || (type === 'scheduled' && selectedDays.length === 0)}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl"
+            className="w-full h-12 sm:h-11 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-semibold"
           >
             Adicionar Hábito
           </Button>

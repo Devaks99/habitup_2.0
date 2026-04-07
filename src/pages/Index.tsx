@@ -97,11 +97,11 @@ const Index = ({ profile }: IndexProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="relative z-10 px-5 pt-10 pb-7 rounded-b-[2.5rem] bg-gradient-to-b from-[#8fbc8f20] to-[#8fbc8f08] backdrop-blur-sm border-b border-border/30">
+      <header className="relative z-10 px-5 pt-10 pb-[40px] rounded-b-[2.5rem] bg-[#8fbc8f14] backdrop-blur-sm border-b border-[#8fbc8f]" style={{ borderBottomWidth: '3px' }}>
         <div className="mx-auto max-w-lg">
           {/* Top row: Brand + Settings */}
-          <div className="flex items-center justify-between mb-6">
-            <span className="font-display font-bold text-[17px] tracking-tight text-foreground/80">
+          <div className="flex items-center justify-between mb-4">
+            <span className="font-display font-bold text-[20px] tracking-tight text-foreground/80">
               <span className="text-primary">Habit</span><span className="text-accent font-extrabold">Up</span>
             </span>
             <Button
@@ -117,13 +117,13 @@ const Index = ({ profile }: IndexProps) => {
           {/* Greeting block */}
           <div className="space-y-1">
             <h1 className="text-[26px] font-display font-bold text-foreground leading-none tracking-tight">
-              {profile.name ? `${greeting}, ${profile.name}` : `${greeting}!`}
+              {profile.name ? `${greeting}, ${profile.name}!` : `${greeting}!`}
             </h1>
-            <p className="text-[13px] text-foreground/40 font-normal tracking-wide">
+            <p className="text-[13px] text-gray-500 font-normal tracking-wide">
               {dayName}, {dateStr}
             </p>
             {profile.bio && (
-              <p className="text-[12px] text-foreground/35 leading-relaxed pt-0.5">{profile.bio}</p>
+              <p className="text-[12px] text-[#545454] leading-relaxed pt-0.5">{profile.bio}</p>
             )}
           </div>
         </div>
@@ -243,21 +243,23 @@ const Index = ({ profile }: IndexProps) => {
           </div>
 
           {/* Habit count summary */}
-          <div className="flex items-center gap-3 mt-4 pt-3.5 border-t border-border/50">
-            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <Repeat className="w-3 h-3" />
-              <span>{dailyHabits.length} diário{dailyHabits.length !== 1 ? 's' : ''}</span>
+          <div className="flex flex-col sm:flex-row sm:items-center pt-6 sm:pt-3.5 border-t border-border/50 gap-3 sm:gap-4">
+            <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 sm:gap-4 flex-1 max-w-sm mx-auto sm:mx-0">
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <Repeat className="w-3 h-3" />
+                <span>{dailyHabits.length} diário{dailyHabits.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="hidden sm:block w-px h-4 bg-border mx-3 sm:mx-0" />
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <Calendar className="w-3 h-3" />
+                <span>{scheduledHabits.length} programado{scheduledHabits.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="hidden sm:block w-px h-4 bg-border mx-3 sm:mx-0" />
+              <div className="text-[11px] text-muted-foreground">
+                {habits.length} total
+              </div>
             </div>
-            <div className="w-px h-3 bg-border" />
-            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <Calendar className="w-3 h-3" />
-              <span>{scheduledHabits.length} programado{scheduledHabits.length !== 1 ? 's' : ''}</span>
-            </div>
-            <div className="w-px h-3 bg-border" />
-            <div className="text-[11px] text-muted-foreground">
-              {habits.length} total
-            </div>
-            <div className="ml-auto">
+            <div className="flex justify-center sm:justify-end">
               <ShareProgressDialog
                 streak={stats.currentStreak}
                 level={stats.level}
