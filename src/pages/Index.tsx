@@ -6,7 +6,7 @@ import { AddHabitDialog } from '@/components/AddHabitDialog';
 import { CelebrationBanner } from '@/components/CelebrationBanner';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Settings, Flame, Star, RotateCcw, ChevronDown, Calendar, Repeat, Trash2 } from 'lucide-react';
+import { Plus, Settings, Flame, Star, RotateCcw, ChevronDown, Calendar, Repeat, Trash2, Instagram, Github, Linkedin } from 'lucide-react';
 import { getTodayWeekDay, getXpProgress, WEEKDAY_LABELS } from '@/types/habit';
 import mascotImg from '@/assets/mascote_habitup.png';
 import mascotCelebrationImg from '@/assets/mascote_comemoracao_habitup.png';
@@ -443,6 +443,18 @@ const Index = ({ profile }: IndexProps) => {
       </div>
 
       <AddHabitDialog open={dialogOpen} onOpenChange={setDialogOpen} onAdd={addHabit} />
+
+      <footer className="pb-8 pt-2 flex items-center justify-center gap-5">
+        <a href="https://www.instagram.com/dev_inojoza_/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground/40 hover:text-primary transition-colors">
+          <Instagram className="w-4 h-4" />
+        </a>
+        <a href="https://github.com/Inojoza28" target="_blank" rel="noopener noreferrer" className="text-muted-foreground/40 hover:text-primary transition-colors">
+          <Github className="w-4 h-4" />
+        </a>
+        <a href="https://www.linkedin.com/in/gabrielinojoza/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground/40 hover:text-primary transition-colors">
+          <Linkedin className="w-4 h-4" />
+        </a>
+      </footer>
     </div>
   );
 };
