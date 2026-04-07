@@ -147,8 +147,9 @@ const Index = ({ profile }: IndexProps) => {
                       src={mascotImg}
                       alt="HabitUp mascote"
                       className="w-12 h-12 object-contain mb-0.5"
-                      animate={{ y: [0, -3, 0] }}
-                      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                     />
                     <span className="text-[11px] font-display font-bold text-foreground leading-none">
                       {completionPercentage}%
