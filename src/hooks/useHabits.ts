@@ -9,16 +9,6 @@ const STATS_KEY = 'habits-app-stats';
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
     const data = localStorage.getItem(key);
-    if (!data) return fallback;
-    return JSON.parse(data) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-function loadTyped<T>(key: string, fallback: T): T {
-  try {
-    const data = localStorage.getItem(key);
     return data ? JSON.parse(data) : fallback;
   } catch {
     return fallback;
