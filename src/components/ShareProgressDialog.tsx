@@ -96,7 +96,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
           Compartilhar
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden rounded-2xl border-border">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md p-0 gap-0 overflow-hidden rounded-2xl border-border mx-auto">
         <DialogHeader className="px-5 pt-5 pb-3">
           <DialogTitle className="text-base font-display font-bold">Compartilhar progresso</DialogTitle>
         </DialogHeader>
@@ -135,12 +135,12 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
 
         {/* Card preview */}
         <div className="px-5 pb-4 flex justify-center">
-          <div className="rounded-2xl overflow-hidden shadow-lg border border-border/50 inline-block">
+          <div className="rounded-2xl overflow-hidden shadow-lg border border-border/50 w-full max-w-[360px] aspect-square">
             <div
               ref={cardRef}
               style={{
-                width: 360,
-                height: 360,
+                width: '100%',
+                aspectRatio: '1 / 1',
                 background: 'linear-gradient(145deg, #e8f5e8 0%, #f0f7e8 30%, #fdf8ef 60%, #fff9f0 100%)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -181,8 +181,8 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
                 src={mascot.src}
                 alt="Mascote"
                 style={{
-                  width: 100, height: 100, objectFit: 'contain',
-                  marginBottom: 18,
+                  width: 120, height: 120, objectFit: 'contain',
+                  marginBottom: 20,
                   filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.08))',
                 }}
                 crossOrigin="anonymous"
@@ -260,7 +260,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
         </div>
 
         {/* Actions */}
-        <div className="px-5 pb-5 flex gap-2">
+        <div className="px-5 pb-5 flex flex-col sm:flex-row gap-2">
           <Button
             onClick={handleDownload}
             disabled={isGenerating}
