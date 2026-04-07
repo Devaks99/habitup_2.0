@@ -36,7 +36,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
   const mascot = MASCOTS.find(m => m.id === selectedMascot) || MASCOTS[0];
 
   const handleDownload = useCallback(async () => {
-    if (!cardRef.current || !imageLoaded) return;
+    if (!cardRef.current) return;
     setIsGenerating(true);
     try {
       const dataUrl = await toPng(cardRef.current, {
@@ -56,7 +56,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
   }, []);
 
   const handleShare = useCallback(async () => {
-    if (!cardRef.current || !imageLoaded) return;
+    if (!cardRef.current) return;
     setIsGenerating(true);
     try {
       const dataUrl = await toPng(cardRef.current, {
@@ -268,7 +268,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
         <div className="px-5 pb-5 flex flex-col sm:flex-row gap-2">
           <Button
             onClick={handleDownload}
-            disabled={isGenerating || !imageLoaded}
+            disabled={isGenerating}
             className="flex-1 rounded-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 text-sm font-medium"
           >
             <Download className="w-4 h-4" />
@@ -276,7 +276,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
           </Button>
           <Button
             onClick={handleShare}
-            disabled={isGenerating || !imageLoaded}
+            disabled={isGenerating}
             variant="outline"
             className="flex-1 rounded-full gap-2 h-10 text-sm font-medium border-border"
           >
