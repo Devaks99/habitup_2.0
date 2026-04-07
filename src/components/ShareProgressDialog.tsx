@@ -139,8 +139,8 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
             <div
               ref={cardRef}
               style={{
-                width: 400,
-                minHeight: 280,
+                width: 1080,
+                height: 1080,
                 background: 'linear-gradient(145deg, #e8f5e8 0%, #f0f7e8 30%, #fdf8ef 60%, #fff9f0 100%)',
                 display: 'flex',
                 flexDirection: 'column',
