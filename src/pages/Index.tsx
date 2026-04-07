@@ -46,7 +46,8 @@ const Index = ({ profile }: IndexProps) => {
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showAllHabits, setShowAllHabits] = useState(false);
-  const [showWaving, setShowWaving] = useState(true);
+  const isFirstVisit = !sessionStorage.getItem('habitup-visited');
+  const [showWaving, setShowWaving] = useState(isFirstVisit);
   const wavingTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const triggerWaving = () => {
@@ -56,8 +57,11 @@ const Index = ({ profile }: IndexProps) => {
   };
 
   useEffect(() => {
-    wavingTimerRef.current = setTimeout(() => setShowWaving(false), 6000);
-    return () => clearTimeout(wavingTimerRef.current);
+    if (isFirstVisit) {
+      sessionStorage.setItem('habitup-visited', '1');
+      wavingTimerRef.current = setTimeout(() => setShowWaving(false), 6000);
+      return () => clearTimeout(wavingTimerRef.current);
+    }
   }, []);
   const {
     habits,
