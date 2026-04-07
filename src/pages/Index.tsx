@@ -46,6 +46,12 @@ const Index = ({ profile }: IndexProps) => {
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showAllHabits, setShowAllHabits] = useState(false);
+  const [showWaving, setShowWaving] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowWaving(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
   const {
     habits,
     todayHabits,
