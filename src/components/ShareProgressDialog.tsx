@@ -141,6 +141,8 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
               style={{
                 width: 1080,
                 height: 1080,
+                transform: 'scale(0.3148)',
+                transformOrigin: 'top left',
                 background: 'linear-gradient(145deg, #e8f5e8 0%, #f0f7e8 30%, #fdf8ef 60%, #fff9f0 100%)',
                 display: 'flex',
                 flexDirection: 'column',
