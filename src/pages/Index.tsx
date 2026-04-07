@@ -101,9 +101,11 @@ const Index = ({ profile }: IndexProps) => {
         <div className="mx-auto max-w-lg">
           {/* Top row: Brand + Settings */}
           <div className="flex items-center justify-between mb-4">
-            <span className="font-display font-bold text-[20px] tracking-tight text-foreground/80">
-              <span className="text-primary">Habit</span><span className="text-accent font-extrabold">Up</span>
-            </span>
+            <div className="flex items-baseline gap-1">
+              <span className="font-display font-bold text-[20px] tracking-tight text-foreground/75">
+                <span className="text-primary">Habit</span><span className="text-accent font-extrabold">up</span> <span className="text-[#adadad] text-[14px] font-normal">• Evolua todos os dias</span>
+              </span>
+            </div>
             <Button
               variant="ghost"
               size="icon"
