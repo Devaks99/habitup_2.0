@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { useImageToBase64 } from '@/hooks/useImageToBase64';
 import { toPng } from 'html-to-image';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
@@ -34,6 +35,8 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
   const mascotImgRef = useRef<HTMLImageElement>(null);
 
   const mascot = MASCOTS.find(m => m.id === selectedMascot) || MASCOTS[0];
+
+  const mascotBase64 = useImageToBase64(mascot.src);
 
   const handleDownload = useCallback(async () => {
     if (!cardRef.current) return;
@@ -182,7 +185,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
               {/* Mascot */}
               <img
                 ref={mascotImgRef}
-                src={mascot.src}
+                src={mascotBase64 ?? mascot.src}
                 alt="Mascote"
                 style={{
                   width: 120, height: 120, objectFit: 'contain',
