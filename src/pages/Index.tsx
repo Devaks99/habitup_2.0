@@ -78,7 +78,7 @@ const Index = ({ profile }: IndexProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-[hsl(var(--header-bg))] px-5 pt-8 pb-6 rounded-b-3xl border-b border-border/40 shadow-[0_2px_12px_-4px_hsl(var(--foreground)/0.04)]">
+      <header className="relative z-10 bg-[hsl(var(--header-bg))] px-5 pt-8 pb-8 rounded-b-[2rem] shadow-[0_4px_20px_-6px_hsl(var(--foreground)/0.07),0_1px_4px_-2px_hsl(var(--foreground)/0.04)]">
         <div className="mx-auto max-w-lg">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
@@ -109,7 +109,7 @@ const Index = ({ profile }: IndexProps) => {
         </div>
       </header>
 
-      <div className="mx-auto max-w-lg px-5 pb-28 space-y-5">
+      <div className="mx-auto max-w-lg px-5 pb-28 pt-6 space-y-5">
         {/* Progress card */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
