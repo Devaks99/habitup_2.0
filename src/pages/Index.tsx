@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Plus, Settings, Flame, Star, RotateCcw, ChevronDown, Calendar, Repeat, Trash2 } from 'lucide-react';
 import { getTodayWeekDay, getXpProgress, WEEKDAY_LABELS } from '@/types/habit';
+import mascotImg from '@/assets/mascote_habitup.png';
 import type { UserProfile } from '@/types/userProfile';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -151,7 +152,7 @@ const Index = ({ profile }: IndexProps) => {
               </div>
             ) : (
               <div className="relative flex-shrink-0 w-[108px] h-[108px] flex items-center justify-center">
-                <span className="text-4xl">🌱</span>
+                <img src={mascotImg} alt="HabitUp mascote" className="w-20 h-20 object-contain" />
               </div>
             )}
 
