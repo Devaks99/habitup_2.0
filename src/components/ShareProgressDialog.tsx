@@ -260,7 +260,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
         </div>
 
         {/* Actions */}
-        <div className="px-5 pb-5 flex gap-2">
+        <div className="px-5 pb-5 flex flex-col sm:flex-row gap-2">
           <Button
             onClick={handleDownload}
             disabled={isGenerating}
