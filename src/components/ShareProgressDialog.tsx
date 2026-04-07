@@ -7,6 +7,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Share2, Download, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import mascotDefault from '@/assets/mascote_habitup.png';
 import mascotWaving from '@/assets/mascote_acenando_habitup.png';
@@ -36,7 +37,8 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
 
   const mascot = MASCOTS.find(m => m.id === selectedMascot) || MASCOTS[0];
 
-  const mascotBase64 = useImageToBase64(mascot.src);
+  const mascotImage = useImageToBase64(mascot.src);
+  const isMascotReady = mascotImage.status === 'ready';
 
   const handleDownload = useCallback(async () => {
     if (!cardRef.current) return;
@@ -183,18 +185,22 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
               </div>
 
               {/* Mascot */}
-              <img
-                ref={mascotImgRef}
-                src={mascotBase64 ?? mascot.src}
-                alt="Mascote"
-                style={{
-                  width: 120, height: 120, objectFit: 'contain',
-                  marginBottom: 20,
-                  filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.08))',
-                }}
-                onLoad={() => setImageLoaded(true)}
-                onError={() => console.error('Mascot image load failed:', mascot.src)}
-              />
+              {mascotImage.status === 'loading' ? (
+                <Skeleton className="w-[120px] h-[120px] rounded-2xl mx-auto mb-5" />
+              ) : (
+                <img
+                  ref={mascotImgRef}
+                  src={mascotImage.base64 ?? mascot.src}
+                  alt="Mascote"
+                  style={{
+                    width: 120, height: 120, objectFit: 'contain',
+                    marginBottom: 20,
+                    filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.08))',
+                  }}
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => console.error('Mascot image load failed:', mascot.src)}
+                />
+              )}
 
               {/* Stats */}
               <div style={{
@@ -271,43 +277,46 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
         <div className="px-5 pb-5 flex flex-col sm:flex-row gap-2">
           <Button
             onClick={handleDownload}
-            disabled={isGenerating}
-            className="flex-1 rounded-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 text-sm font-medium"
+            disabled={isGenerating || !isMascotReady}
+            className="flex-1 rounded-full gap-2 bg-primary/50 data-[disabled]:bg-primary/30 text-primary-foreground/80 data-[disabled]:text-primary-foreground/50 h-10 text-sm font-medium"
           >
-            <Download className="w-4 h-4" />
-            Baixar imagem
+            {!isMascotReady ? (
+              'Preparando...'
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                Baixar imagem
+              </>
+            )}
           </Button>
-          <Button
+            <Button
             onClick={handleShare}
-            disabled={isGenerating}
+            disabled={isGenerating || !isMascotReady}
             variant="outline"
-            className="flex-1 rounded-full gap-2 h-10 text-sm font-medium border-border"
+            className="flex-1 rounded-full gap-2 h-10 text-sm font-medium border-border data-[disabled]:opacity-60 data-[disabled]:cursor-not-allowed"
           >
-            <AnimatePresence mode="wait">
-              {copied ? (
-                <motion.span
-                  key="copied"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center gap-1.5"
-                >
-                  <Check className="w-4 h-4 text-success" />
-                  Copiado!
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="share"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center gap-1.5"
-                >
-                  <Share2 className="w-4 h-4" />
-                  Compartilhar
-                </motion.span>
-              )}
-            </AnimatePresence>
+            {!isMascotReady ? (
+              'Preparando...'
+            ) : copied ? (
+              <motion.span
+                key="copied"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex items-center gap-1.5"
+              >
+                <Check className="w-4 h-4 text-success" />
+                Copiado!
+              </motion.span>
+            ) : (
+              <motion.span
+                key="share"
+                className="flex items-center gap-1.5"
+              >
+                <Share2 className="w-4 h-4" />
+                Compartilhar
+              </motion.span>
+            )}
           </Button>
         </div>
       </DialogContent>

@@ -1,12 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export function useImageToBase64(src: string): string | null {
-  const [base64, setBase64] = useState<string | null>(null);
+interface ImageStatus {
+  base64: string | null;
+  status: 'idle' | 'loading' | 'ready' | 'error';
+}
+
+export function useImageToBase64(src: string): ImageStatus {
+  const [state, setState] = useState<ImageStatus>({ base64: null, status: 'idle' });
 
   const loadImageToBase64 = useCallback(async (imageSrc: string) => {
+    setState({ base64: null, status: 'loading' });
     try {
       const img = new Image();
-      img.crossOrigin = 'anonymous'; // Handle potential CORS if external
+      img.crossOrigin = 'anonymous';
       img.onload = () => {
         const canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth;
@@ -15,19 +21,19 @@ export function useImageToBase64(src: string): string | null {
         if (ctx) {
           ctx.drawImage(img, 0, 0);
           const dataUrl = canvas.toDataURL('image/png');
-          setBase64(dataUrl);
+          setState({ base64: dataUrl, status: 'ready' });
         } else {
-          setBase64(null);
+          setState({ base64: null, status: 'error' });
         }
       };
       img.onerror = () => {
         console.error('Failed to load image:', imageSrc);
-        setBase64(null);
+        setState({ base64: null, status: 'error' });
       };
       img.src = imageSrc;
     } catch (error) {
       console.error('Error converting image to base64:', error);
-      setBase64(null);
+      setState({ base64: null, status: 'error' });
     }
   }, []);
 
@@ -35,10 +41,10 @@ export function useImageToBase64(src: string): string | null {
     if (src) {
       loadImageToBase64(src);
     } else {
-      setBase64(null);
+      setState({ base64: null, status: 'idle' });
     }
   }, [src, loadImageToBase64]);
 
-  return base64;
+  return state;
 }
 
