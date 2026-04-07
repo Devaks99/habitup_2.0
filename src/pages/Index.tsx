@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Plus, Settings, Flame, Star, RotateCcw, ChevronDown, Calendar, Repeat, Trash2, Instagram, Github, Linkedin } from 'lucide-react';
 import { getTodayWeekDay, getXpProgress, WEEKDAY_LABELS } from '@/types/habit';
 import mascotImg from '@/assets/mascote_habitup.png';
+import mascotWavingImg from '@/assets/mascote_acenando_habitup.png';
 import mascotCelebrationImg from '@/assets/mascote_comemoracao_habitup.png';
 import type { UserProfile } from '@/types/userProfile';
 import { motion, AnimatePresence } from 'framer-motion';
