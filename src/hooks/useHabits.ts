@@ -22,10 +22,10 @@ function saveToStorage(key: string, data: unknown) {
 const DEFAULT_STATS: UserStats = { totalXp: 0, level: 1, currentStreak: 0, lastCompletedDate: null };
 
 export function useHabits() {
-  const [habits, setHabits] = useState<Habit[]>(() => loadTyped(HABITS_KEY, []));
+  const [habits, setHabits] = useState<Habit[]>(() => loadFromStorage(HABITS_KEY, []));
   const [progress, setProgress] = useState<DayProgress>(() => {
     const today = getTodayKey();
-    const saved = loadTyped<DayProgress>(PROGRESS_KEY, {
+    const saved = loadFromStorage<DayProgress>(PROGRESS_KEY, {
       date: today,
       completedHabitIds: [],
       totalXpEarned: 0,
@@ -37,7 +37,7 @@ export function useHabits() {
     return saved;
   });
   const [stats, setStats] = useState<UserStats>(() => {
-    const saved = loadTyped<UserStats>(STATS_KEY, DEFAULT_STATS);
+    const saved = loadFromStorage<UserStats>(STATS_KEY, DEFAULT_STATS);
     // Check if streak should be reset (missed yesterday)
     if (saved.lastCompletedDate) {
       const yesterday = getYesterdayKey();
