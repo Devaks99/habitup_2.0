@@ -78,7 +78,7 @@ const Index = ({ profile }: IndexProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="px-5 pt-8 pb-5">
+      <header className="bg-[hsl(var(--header-bg))] px-5 pt-8 pb-6 rounded-b-3xl border-b border-border/40 shadow-[0_2px_12px_-4px_hsl(var(--foreground)/0.04)]">
         <div className="mx-auto max-w-lg">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
@@ -90,7 +90,7 @@ const Index = ({ profile }: IndexProps) => {
               variant="ghost"
               size="icon"
               onClick={() => navigate('/settings')}
-              className="rounded-full hover:bg-muted w-9 h-9"
+              className="rounded-full hover:bg-white/60 w-9 h-9"
             >
               <Settings className="w-[18px] h-[18px] text-muted-foreground" />
             </Button>
