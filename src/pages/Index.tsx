@@ -1,15 +1,26 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHabits } from '@/hooks/useHabits';
-import { XpBar } from '@/components/XpBar';
 import { HabitCard } from '@/components/HabitCard';
 import { AddHabitDialog } from '@/components/AddHabitDialog';
 import { CelebrationBanner } from '@/components/CelebrationBanner';
 import { DailyProgress } from '@/components/DailyProgress';
 import { Button } from '@/components/ui/button';
-import { Plus, Sparkles, Settings } from 'lucide-react';
-import { WEEKDAY_LABELS, getTodayWeekDay } from '@/types/habit';
+import { Progress } from '@/components/ui/progress';
+import { Plus, Settings, Flame, Star, RotateCcw } from 'lucide-react';
+import { getTodayWeekDay, getXpProgress } from '@/types/habit';
 import type { UserProfile } from '@/types/userProfile';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const WEEKDAY_FULL: Record<string, string> = {
   mon: 'Segunda-feira',
@@ -41,6 +52,7 @@ const Index = ({ profile }: IndexProps) => {
     addHabit,
     removeHabit,
     toggleHabit,
+    resetXp,
     isCompleted,
     completionPercentage,
     xpPopup,
@@ -50,73 +62,116 @@ const Index = ({ profile }: IndexProps) => {
   const today = new Date();
   const dayName = WEEKDAY_FULL[getTodayWeekDay()];
   const dateStr = today.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
-
   const completedCount = todayHabits.filter(h => isCompleted(h.id)).length;
   const greeting = getGreeting();
+  const xpProgress = getXpProgress(stats.totalXp);
+  const hasStreak = stats.currentStreak > 0;
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-10 overflow-hidden">
-        <div className="bg-gradient-to-br from-primary/90 via-primary/80 to-primary/70 backdrop-blur-xl rounded-b-[2rem] shadow-lg shadow-primary/10">
-          <div className="mx-auto max-w-lg px-5 pt-6 pb-5">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-primary-foreground/15 backdrop-blur-sm border border-primary-foreground/10">
-                  <Sparkles className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-primary-foreground/70 tracking-wide">
-                    {dayName}, {dateStr}
-                  </p>
-                  <h1 className="text-xl font-display font-bold text-primary-foreground leading-tight mt-0.5">
-                    {profile.name ? `${greeting}, ${profile.name} 👋` : `${greeting}!`}
-                  </h1>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate('/settings')}
-                className="rounded-xl hover:bg-primary-foreground/10 text-primary-foreground/70 hover:text-primary-foreground mt-0.5"
-              >
-                <Settings className="w-5 h-5" />
-              </Button>
-            </div>
-
-            {/* Mini stats in header */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1 rounded-xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 px-3.5 py-2.5">
-                <p className="text-[10px] font-medium text-primary-foreground/60 uppercase tracking-wider">Nível</p>
-                <p className="text-lg font-display font-bold text-primary-foreground leading-tight">{stats.level}</p>
-              </div>
-              <div className="flex-1 rounded-xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 px-3.5 py-2.5">
-                <p className="text-[10px] font-medium text-primary-foreground/60 uppercase tracking-wider">XP Total</p>
-                <p className="text-lg font-display font-bold text-primary-foreground leading-tight">{stats.totalXp}</p>
-              </div>
-              <div className="flex-1 rounded-xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 px-3.5 py-2.5">
-                <p className="text-[10px] font-medium text-primary-foreground/60 uppercase tracking-wider">Hoje</p>
-                <p className="text-lg font-display font-bold text-primary-foreground leading-tight">
-                  {todayHabits.length > 0 ? `${completedCount}/${todayHabits.length}` : '—'}
-                </p>
-              </div>
-            </div>
+      {/* Header — clean & minimal */}
+      <header className="pt-8 pb-2 px-4">
+        <div className="mx-auto max-w-lg">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-medium text-muted-foreground tracking-wide">
+              {dayName}, {dateStr}
+            </p>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/settings')}
+              className="rounded-xl hover:bg-muted -mr-2 w-8 h-8"
+            >
+              <Settings className="w-4 h-4 text-muted-foreground" />
+            </Button>
           </div>
+          <h1 className="text-2xl font-display font-bold text-foreground leading-tight">
+            {profile.name ? `${greeting}, ${profile.name}` : `${greeting}!`}
+          </h1>
         </div>
       </header>
 
-      <div className="mx-auto max-w-lg px-4 py-6 pb-24 space-y-5">
-        {/* Stats */}
-        <div className="space-y-3">
-          <XpBar stats={stats} />
-          {todayHabits.length > 0 && (
-            <DailyProgress
-              percentage={completionPercentage}
-              completed={completedCount}
-              total={todayHabits.length}
-            />
-          )}
+      <div className="mx-auto max-w-lg px-4 pt-5 pb-24 space-y-5">
+        {/* Streak + XP card */}
+        <div className={`rounded-2xl border p-5 transition-all duration-500 ${
+          hasStreak
+            ? 'bg-gradient-to-br from-accent/8 via-card to-card border-accent/25 shadow-sm shadow-accent/5'
+            : 'bg-card border-border'
+        }`}>
+          <div className="flex items-center justify-between mb-4">
+            {/* Streak */}
+            <div className="flex items-center gap-3">
+              <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-500 ${
+                hasStreak ? 'bg-accent/15' : 'bg-muted'
+              }`}>
+                <Flame className={`w-5 h-5 transition-colors duration-500 ${
+                  hasStreak ? 'text-accent' : 'text-muted-foreground'
+                }`} />
+              </div>
+              <div>
+                <p className={`text-2xl font-display font-bold leading-none ${
+                  hasStreak ? 'text-accent' : 'text-muted-foreground'
+                }`}>
+                  {stats.currentStreak}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {stats.currentStreak === 1 ? 'dia de sequência' : 'dias de sequência'}
+                </p>
+              </div>
+            </div>
+
+            {/* Level + XP */}
+            <div className="text-right">
+              <div className="flex items-center gap-1.5 justify-end">
+                <Star className="w-4 h-4 text-xp" />
+                <p className="text-sm font-display font-bold text-foreground">Nível {stats.level}</p>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">{stats.totalXp} XP</p>
+            </div>
+          </div>
+
+          {/* XP progress bar */}
+          <div className="space-y-1.5">
+            <Progress value={xpProgress} className="h-2 bg-secondary [&>div]:bg-xp" />
+            <div className="flex justify-between">
+              <p className="text-[10px] text-muted-foreground">{xpProgress}/100 XP</p>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="text-[10px] text-muted-foreground/50 hover:text-destructive transition-colors flex items-center gap-0.5">
+                    <RotateCcw className="w-2.5 h-2.5" />
+                    resetar
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-2xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="font-display">Resetar progresso?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Isso irá zerar seu XP, nível e sequência. Seus hábitos serão mantidos. Esta ação não pode ser desfeita.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={resetXp}
+                      className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Confirmar reset
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
         </div>
+
+        {/* Daily progress */}
+        {todayHabits.length > 0 && (
+          <DailyProgress
+            percentage={completionPercentage}
+            completed={completedCount}
+            total={todayHabits.length}
+          />
+        )}
 
         {/* Celebration */}
         <CelebrationBanner message={celebrationMessage} />
