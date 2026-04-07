@@ -154,13 +154,13 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
             >
               {/* Decorative circles */}
               <div style={{
-                position: 'absolute', top: -30, right: -30,
-                width: 120, height: 120, borderRadius: '50%',
+                position: 'absolute', top: -60, right: -60,
+                width: 300, height: 300, borderRadius: '50%',
                 background: 'radial-gradient(circle, rgba(76, 175, 80, 0.08) 0%, transparent 70%)',
               }} />
               <div style={{
-                position: 'absolute', bottom: -20, left: -20,
-                width: 90, height: 90, borderRadius: '50%',
+                position: 'absolute', bottom: -40, left: -40,
+                width: 220, height: 220, borderRadius: '50%',
                 background: 'radial-gradient(circle, rgba(255, 183, 77, 0.1) 0%, transparent 70%)',
               }} />
 
