@@ -135,7 +135,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
 
         {/* Card preview */}
         <div className="px-5 pb-4 flex justify-center">
-          <div className="rounded-2xl overflow-hidden shadow-lg border border-border/50 inline-block">
+          <div className="rounded-2xl overflow-hidden shadow-lg border border-border/50 inline-block" style={{ width: 340, height: 340 }}>
             <div
               ref={cardRef}
               style={{
