@@ -92,18 +92,18 @@ const Index = ({ profile }: IndexProps) => {
               onClick={() => navigate('/settings')}
               className="rounded-full hover:bg-white/60 w-9 h-9"
             >
-              <Settings className="w-[18px] h-[18px] text-muted-foreground" />
+              <Settings className="w-[18px] h-[18px] text-foreground/50" />
             </Button>
           </div>
           <div>
-            <p className="text-[13px] text-muted-foreground">
+            <p className="text-[13px] text-foreground/50 font-medium">
               {dayName}, {dateStr}
             </p>
             <h1 className="text-[22px] font-display font-bold text-foreground leading-tight tracking-tight mt-0.5">
               {profile.name ? `${greeting}, ${profile.name}` : `${greeting}!`}
             </h1>
             {profile.bio && (
-              <p className="text-[12px] text-muted-foreground/70 mt-0.5 leading-snug">{profile.bio}</p>
+              <p className="text-[12px] text-foreground/45 mt-0.5 leading-snug">{profile.bio}</p>
             )}
           </div>
         </div>
