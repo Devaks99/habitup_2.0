@@ -18,7 +18,7 @@ interface AddHabitDialogProps {
 
 export function AddHabitDialog({ open, onOpenChange, onAdd }: AddHabitDialogProps) {
   const [name, setName] = useState('');
-  const [emoji, setEmoji] = useState('🎯');
+  const [emoji, setEmoji] = useState('📚');
   const [type, setType] = useState<'daily' | 'scheduled'>('daily');
   const [selectedDays, setSelectedDays] = useState<WeekDay[]>([]);
   const [xpReward, setXpReward] = useState(10);
@@ -63,6 +63,7 @@ export function AddHabitDialog({ open, onOpenChange, onAdd }: AddHabitDialogProp
               onChange={e => setName(e.target.value)}
               placeholder="Ex: Meditar 10 minutos"
               className="bg-secondary/50"
+              autoFocus={false}
             />
           </div>
 

@@ -37,9 +37,11 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
     if (!cardRef.current) return;
     setIsGenerating(true);
     try {
-      const dataUrl = await toPng(cardRef.current, {
+        const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         cacheBust: true,
+        skipFonts: false,
+        imagePlaceholder: 'transparent',
       });
       const link = document.createElement('a');
       link.download = `habitup-progresso.png`;
