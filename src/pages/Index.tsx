@@ -191,7 +191,8 @@ const Index = ({ profile }: IndexProps) => {
                     <motion.img
                       src={showWaving ? mascotWavingImg : mascotImg}
                       alt="HabitUp mascote"
-                      className="w-24 h-24 object-contain"
+                      className="w-24 h-24 object-contain cursor-pointer"
+                      onClick={triggerWaving}
                       key={showWaving ? 'waving-empty' : 'normal-empty'}
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
