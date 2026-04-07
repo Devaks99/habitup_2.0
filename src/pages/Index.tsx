@@ -49,7 +49,7 @@ const Index = ({ profile }: IndexProps) => {
   const [showWaving, setShowWaving] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowWaving(false), 3000);
+    const timer = setTimeout(() => setShowWaving(false), 6000);
     return () => clearTimeout(timer);
   }, []);
   const {
@@ -131,7 +131,7 @@ const Index = ({ profile }: IndexProps) => {
         >
           <div className="flex items-center gap-5">
             {/* Circular progress */}
-            <div className="relative flex-shrink-0">
+            <div className="relative flex-shrink-0 -ml-1">
               {todayHabits.length > 0 ? (
                 <>
                   <svg width="120" height="120" className="transform -rotate-90">
