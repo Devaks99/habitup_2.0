@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { Habit, DayProgress, UserStats } from '@/types/habit';
 import { getTodayKey, getYesterdayKey, isHabitActiveToday, getLevel } from '@/types/habit';
 
+
 const HABITS_KEY = 'habits-app-habits';
 const PROGRESS_KEY = 'habits-app-progress';
 const STATS_KEY = 'habits-app-stats';
