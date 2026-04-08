@@ -28,7 +28,7 @@ function HabitCardContent({
     <motion.div
       layout
       className={cn(
-        "group relative flex items-center gap-3.5 rounded-2xl border px-4 py-3.5 transition-all duration-300",
+        "group relative flex items-center gap-2 rounded-2xl border px-4 py-3.5 transition-all duration-300",
         isDragging
           ? "opacity-50 bg-accent/5 border-primary/30 shadow-lg"
           : completed
