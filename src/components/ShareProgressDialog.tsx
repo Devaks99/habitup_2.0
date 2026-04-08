@@ -47,26 +47,50 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
 
   const ensureImagePainted = useCallback(async () => {
     if (mascotImgRef.current) {
+      // Wait for image to decode
       await mascotImgRef.current.decode().catch(() => undefined);
+
+      // Double-check that image is complete
+      if (!mascotImgRef.current.complete) {
+        await new Promise(resolve => {
+          const checkComplete = () => {
+            if (mascotImgRef.current?.complete) {
+              resolve(void 0);
+            } else {
+              setTimeout(checkComplete, 10);
+            }
+          };
+          checkComplete();
+        });
+      }
+
+      // Wait for multiple animation frames to ensure painting is complete
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+
+      // Small additional delay to ensure browser has finished painting
+      await new Promise(resolve => setTimeout(resolve, 150));
     }
-    await new Promise(requestAnimationFrame);
-    await new Promise(requestAnimationFrame);
   }, []);
 
   const handleDownload = useCallback(async () => {
     if (!cardRef.current || !imageLoaded) return;
     setIsGenerating(true);
     try {
+      console.log('Starting download process...');
       await ensureImagePainted();
+      console.log('Image painted, capturing...');
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         cacheBust: true,
       });
-      console.log('Generated image dataUrl length:', dataUrl.length); // Debug: check if mascot included (larger size)
+      console.log('Generated image dataUrl length:', dataUrl.length);
       const link = document.createElement('a');
       link.download = `habitup-progresso.png`;
       link.href = dataUrl;
       link.click();
+      console.log('Download initiated');
     } catch (err) {
       console.error('Failed to generate image:', err);
     } finally {
@@ -212,7 +236,12 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
                     marginBottom: 20,
                     filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.08))',
                   }}
-                  onLoad={() => setImageLoaded(true)}
+                  onLoad={() => {
+                    // Ensure image is fully loaded and painted before setting state
+                    if (mascotImgRef.current?.complete) {
+                      setImageLoaded(true);
+                    }
+                  }}
                   onError={() => console.error('Mascot image load failed:', mascot.src)}
                 />
               )}
