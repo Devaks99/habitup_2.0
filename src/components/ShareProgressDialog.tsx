@@ -41,9 +41,11 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
   const isMascotReady = mascotImage.status === 'ready';
 
   const handleDownload = useCallback(async () => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || !imageLoaded) return;
     setIsGenerating(true);
     try {
+      // Small delay to ensure DOM is fully rendered
+      await new Promise(resolve => setTimeout(resolve, 100));
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         cacheBust: true,
@@ -58,12 +60,14 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
     } finally {
       setIsGenerating(false);
     }
-  }, []);
+  }, [imageLoaded]);
 
   const handleShare = useCallback(async () => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || !imageLoaded) return;
     setIsGenerating(true);
     try {
+      // Small delay to ensure DOM is fully rendered
+      await new Promise(resolve => setTimeout(resolve, 100));
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         cacheBust: true,
@@ -91,7 +95,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
     } finally {
       setIsGenerating(false);
     }
-  }, [streak, level]);
+  }, [streak, level, imageLoaded]);
 
   return (
     <Dialog>
@@ -277,11 +281,13 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
         <div className="px-5 pb-5 flex flex-col sm:flex-row gap-2">
           <Button
             onClick={handleDownload}
-            disabled={isGenerating || !isMascotReady}
-            className="flex-1 rounded-full gap-2 bg-primary/50 data-[disabled]:bg-primary/30 text-primary-foreground/80 data-[disabled]:text-primary-foreground/50 h-10 text-sm font-medium"
+            disabled={isGenerating || !isMascotReady || !imageLoaded}
+            className="flex-1 rounded-full gap-2 bg-primary text-primary-foreground h-10 text-sm font-medium hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-all"
           >
-            {!isMascotReady ? (
+            {!isMascotReady || !imageLoaded ? (
               'Preparando...'
+            ) : isGenerating ? (
+              'Gerando...'
             ) : (
               <>
                 <Download className="w-4 h-4" />
@@ -289,14 +295,15 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
               </>
             )}
           </Button>
-            <Button
+          <Button
             onClick={handleShare}
-            disabled={isGenerating || !isMascotReady}
-            variant="outline"
-            className="flex-1 rounded-full gap-2 h-10 text-sm font-medium border-border data-[disabled]:opacity-60 data-[disabled]:cursor-not-allowed"
+            disabled={isGenerating || !isMascotReady || !imageLoaded}
+            className="flex-1 rounded-full gap-2 h-10 text-sm font-medium border-2 border-primary bg-primary/5 text-primary hover:bg-primary/10 disabled:border-muted disabled:bg-muted/20 disabled:text-muted-foreground disabled:cursor-not-allowed transition-all"
           >
-            {!isMascotReady ? (
+            {!isMascotReady || !imageLoaded ? (
               'Preparando...'
+            ) : isGenerating ? (
+              'Gerando...'
             ) : copied ? (
               <motion.span
                 key="copied"

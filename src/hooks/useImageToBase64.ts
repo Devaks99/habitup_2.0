@@ -13,24 +13,37 @@ export function useImageToBase64(src: string): ImageStatus {
     try {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          const dataUrl = canvas.toDataURL('image/png');
-          setState({ base64: dataUrl, status: 'ready' });
-        } else {
-          setState({ base64: null, status: 'error' });
-        }
-      };
-      img.onerror = () => {
-        console.error('Failed to load image:', imageSrc);
-        setState({ base64: null, status: 'error' });
-      };
+      
+      // Create a promise that resolves when image loads
+      const loadPromise = new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Image load timeout'));
+        }, 5000); // 5 second timeout
+
+        img.onload = () => {
+          clearTimeout(timeout);
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            const dataUrl = canvas.toDataURL('image/png');
+            setState({ base64: dataUrl, status: 'ready' });
+            resolve();
+          } else {
+            reject(new Error('Failed to get canvas context'));
+          }
+        };
+
+        img.onerror = () => {
+          clearTimeout(timeout);
+          reject(new Error(`Failed to load image: ${imageSrc}`));
+        };
+      });
+
       img.src = imageSrc;
+      await loadPromise;
     } catch (error) {
       console.error('Error converting image to base64:', error);
       setState({ base64: null, status: 'error' });

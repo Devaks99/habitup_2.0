@@ -58,14 +58,15 @@ export function useHabits() {
 
   const todayHabits = habits.filter(isHabitActiveToday);
 
-  const addHabit = useCallback((habit: Omit<Habit, 'id' | 'createdAt'>) => {
+  const addHabit = useCallback((habit: Omit<Habit, 'id' | 'createdAt' | 'order'>) => {
     const newHabit: Habit = {
       ...habit,
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
+      order: habits.length,
     };
     setHabits(prev => [...prev, newHabit]);
-  }, []);
+  }, [habits.length]);
 
   const removeHabit = useCallback((id: string) => {
     setHabits(prev => prev.filter(h => h.id !== id));
@@ -151,6 +152,19 @@ export function useHabits() {
     setStats({ totalXp: 0, level: 1, currentStreak: 0, lastCompletedDate: null });
   }, []);
 
+  const reorderHabits = useCallback((habitIds: string[]) => {
+    setHabits(prev => {
+      const habitMap = new Map(prev.map(h => [h.id, h]));
+      return habitIds
+        .map((id, index) => {
+          const habit = habitMap.get(id);
+          if (!habit) return null;
+          return { ...habit, order: index };
+        })
+        .filter((h): h is Habit => h !== null);
+    });
+  }, []);
+
   const isCompleted = useCallback((habitId: string) => {
     return progress.completedHabitIds.includes(habitId);
   }, [progress.completedHabitIds]);
@@ -172,5 +186,6 @@ export function useHabits() {
     completionPercentage,
     xpPopup,
     celebrationMessage,
+    reorderHabits,
   };
 }

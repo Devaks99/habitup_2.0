@@ -20,6 +20,7 @@ export interface Habit {
   scheduledDays?: WeekDay[];
   xpReward: number;
   createdAt: string;
+  order: number;
 }
 
 export interface DayProgress {

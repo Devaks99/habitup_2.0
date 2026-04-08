@@ -1,8 +1,10 @@
 import type { Habit } from '@/types/habit';
 import { WEEKDAY_LABELS } from '@/types/habit';
 import { cn } from '@/lib/utils';
-import { Check, Trash2 } from 'lucide-react';
+import { Check, Trash2, GripVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface HabitCardProps {
   habit: Habit;
@@ -12,20 +14,40 @@ interface HabitCardProps {
   xpPopup?: { amount: number; id: string } | null;
 }
 
-export function HabitCard({ habit, completed, onToggle, onRemove, xpPopup }: HabitCardProps) {
+function HabitCardContent({ 
+  habit, 
+  completed, 
+  onToggle, 
+  onRemove, 
+  xpPopup,
+  isDragging,
+  attributes,
+  listeners,
+}: HabitCardProps & { isDragging?: boolean; attributes?: any; listeners?: any }) {
   return (
     <motion.div
       layout
       className={cn(
-        "group relative flex items-center gap-3.5 rounded-2xl border px-4 py-3.5 transition-colors duration-300 cursor-pointer",
-        completed
-          ? "bg-success/5 border-success/15"
-          : "bg-card border-border hover:border-primary/15 hover:shadow-sm"
+        "group relative flex items-center gap-3.5 rounded-2xl border px-4 py-3.5 transition-all duration-300",
+        isDragging
+          ? "opacity-50 bg-accent/5 border-primary/30 shadow-lg"
+          : completed
+            ? "bg-success/5 border-success/15 cursor-pointer hover:shadow-sm"
+            : "bg-card border-border cursor-pointer hover:border-primary/15 hover:shadow-sm"
       )}
       onClick={onToggle}
       whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
+      {/* Drag handle */}
+      <div
+        className="flex-shrink-0 cursor-grab active:cursor-grabbing touch-none p-0.5 rounded hover:bg-accent/10 transition-colors"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="w-4 h-4 text-muted-foreground/40 hover:text-muted-foreground/60 transition-colors" />
+      </div>
+
       {/* Checkbox */}
       <motion.div
         className={cn(
@@ -103,5 +125,36 @@ export function HabitCard({ habit, completed, onToggle, onRemove, xpPopup }: Hab
         <Trash2 className="w-3.5 h-3.5" />
       </button>
     </motion.div>
+  );
+}
+
+export function HabitCard({ habit, completed, onToggle, onRemove, xpPopup }: HabitCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: habit.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <HabitCardContent
+        habit={habit}
+        completed={completed}
+        onToggle={onToggle}
+        onRemove={onRemove}
+        xpPopup={xpPopup}
+        isDragging={isDragging}
+        attributes={attributes}
+        listeners={listeners}
+      />
+    </div>
   );
 }

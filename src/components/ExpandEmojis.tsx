@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
 
-const EMOJI_OPTIONS = ['📚', '💪', '🧘', '🏃', '💧', '🍎', '😴', '✍️', '🎯', '🧠', '💊', '🌅', '🎵', '🧹', '💰', '📱', '🙏🏽'];
+const EMOJI_OPTIONS = ['📚', '💪', '🧘', '🏃', '❤️', '🛏️', '💧', '🍎', '😴', '✍️', '🎯', '🧠', '💊', '🌅', '🎵', '🧹', '💰', '📱', '🙏🏽'];
 
 interface ExpandEmojisProps {
   selectedEmoji: string;
@@ -41,7 +41,7 @@ export function ExpandEmojis({ selectedEmoji, onEmojiSelect }: ExpandEmojisProps
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full text-xs h-9 text-muted-foreground hover:text-foreground hover:bg-secondary/70"
         >
-{isExpanded ? 'Ver menos' : 'Ver mais (+12)'} <ChevronDown className={`w-3 h-3 ml-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+{isExpanded ? 'Ver menos' : `Ver mais (+${EMOJI_OPTIONS.length - 5})`} <ChevronDown className={`w-3 h-3 ml-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
         </Button>
       )}
     </div>

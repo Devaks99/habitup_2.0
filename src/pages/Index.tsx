@@ -19,6 +19,8 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
 const WEEKDAY_FULL: Record<string, string> = {
   mon: 'Segunda-feira', tue: 'Terça-feira', wed: 'Quarta-feira',
@@ -86,6 +88,7 @@ const Index = ({ profile }: IndexProps) => {
     completionPercentage,
     xpPopup,
     celebrationMessage,
+    reorderHabits,
   } = useHabits();
 
   const today = new Date();
@@ -95,6 +98,23 @@ const Index = ({ profile }: IndexProps) => {
   const greeting = getGreeting();
   const xpProgress = getXpProgress(stats.totalXp);
   const hasStreak = stats.currentStreak > 0;
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { distance: 8 }),
+    useSensor(TouchSensor, { distance: 8 }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = habits.findIndex(h => h.id === active.id);
+    const newIndex = habits.findIndex(h => h.id === over.id);
+
+    const newOrder = arrayMove(habits.map(h => h.id), oldIndex, newIndex);
+    reorderHabits(newOrder);
+  };
 
   const dailyHabits = habits.filter(h => h.type === 'daily');
   const scheduledHabits = habits.filter(h => h.type === 'scheduled');
@@ -344,27 +364,35 @@ const Index = ({ profile }: IndexProps) => {
                 </Button>
               </motion.div>
             ) : (
-              <div className="space-y-2">
-                <AnimatePresence mode="popLayout">
-                  {todayHabits.map((habit, i) => (
-                    <motion.div
-                      key={habit.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -40 }}
-                      transition={{ delay: i * 0.04, duration: 0.3 }}
-                    >
-                      <HabitCard
-                        habit={habit}
-                        completed={isCompleted(habit.id)}
-                        onToggle={() => toggleHabit(habit.id)}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext items={todayHabits.map(h => h.id)}>
+                  <div className="space-y-2">
+                    <AnimatePresence mode="popLayout">
+                      {todayHabits.map((habit, i) => (
+                        <motion.div
+                          key={habit.id}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, x: -40 }}
+                          transition={{ delay: i * 0.04, duration: 0.3 }}
+                        >
+                          <HabitCard
+                            habit={habit}
+                            completed={isCompleted(habit.id)}
+                            onToggle={() => toggleHabit(habit.id)}
                         onRemove={() => removeHabit(habit.id)}
-                        xpPopup={xpPopup}
-                      />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
+                            xpPopup={xpPopup}
+                          />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </SortableContext>
+              </DndContext>
             )}
           </section>
 
