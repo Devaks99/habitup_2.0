@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useImageToBase64 } from '@/hooks/useImageToBase64';
 import { toPng } from 'html-to-image';
 import {
@@ -39,13 +39,25 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
 
   const mascotImage = useImageToBase64(mascot.src);
   const isMascotReady = mascotImage.status === 'ready';
+  const isReadyToCapture = isMascotReady && imageLoaded && !isGenerating;
+
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [mascot.src]);
+
+  const ensureImagePainted = useCallback(async () => {
+    if (mascotImgRef.current) {
+      await mascotImgRef.current.decode().catch(() => undefined);
+    }
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+  }, []);
 
   const handleDownload = useCallback(async () => {
     if (!cardRef.current || !imageLoaded) return;
     setIsGenerating(true);
     try {
-      // Small delay to ensure DOM is fully rendered
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await ensureImagePainted();
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         cacheBust: true,
@@ -60,14 +72,13 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
     } finally {
       setIsGenerating(false);
     }
-  }, [imageLoaded]);
+  }, [ensureImagePainted, imageLoaded]);
 
   const handleShare = useCallback(async () => {
     if (!cardRef.current || !imageLoaded) return;
     setIsGenerating(true);
     try {
-      // Small delay to ensure DOM is fully rendered
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await ensureImagePainted();
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         cacheBust: true,
@@ -95,7 +106,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
     } finally {
       setIsGenerating(false);
     }
-  }, [streak, level, imageLoaded]);
+  }, [ensureImagePainted, streak, level, imageLoaded]);
 
   return (
     <Dialog>
@@ -275,6 +286,14 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="px-5 pb-1">
+          <p className="text-[11px] text-muted-foreground text-center">
+            {isReadyToCapture
+              ? 'Pronto para gerar a imagem com o mascote completo.'
+              : 'Aguarde até o mascote carregar completamente antes de baixar.'}
+          </p>
         </div>
 
         {/* Actions */}
