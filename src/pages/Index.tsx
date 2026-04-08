@@ -187,7 +187,7 @@ const Index = ({ profile }: IndexProps) => {
           </div>
         </header>
 
-        <div className="mx-auto max-w-lg px-5 pb-10 pt-6 space-y-5">
+        <div className="mx-auto max-w-lg px-5 pb-10 pt-4 space-y-5">
           {/* Progress card */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
