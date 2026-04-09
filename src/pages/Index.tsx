@@ -160,8 +160,8 @@ const Index = ({ profile }: IndexProps) => {
   const progressCardText = getProgressCardTextStyles(stats.currentStreak);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { distance: 8 }),
-    useSensor(TouchSensor, { distance: 8 }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -202,7 +202,7 @@ const Index = ({ profile }: IndexProps) => {
     <>
       <div className="min-h-screen bg-background">
         {/* Header */}
-<header className="relative z-10 px-5 pt-12 pb-10 border-b border-border rounded-b-[2rem] mb-4">
+<header className="relative z-10 px-5 pt-12 pb-8 border-b border-border rounded-b-[2rem] mb-4">
           <div className="mx-auto max-w-lg">
             {/* Top row: Brand + Settings + Info */}
             <div className="flex items-center justify-between mb-4">
