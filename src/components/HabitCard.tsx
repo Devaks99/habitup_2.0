@@ -6,6 +6,7 @@ import { Check, Trash2, GripVertical, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import mascoteOculosEscuroImg from '@/assets/mascote_oculos_escuro_habitup.png';
 
 interface HabitCardProps {
   habit: Habit;
@@ -89,9 +90,12 @@ function HabitCardContent({
             {habit.name}
           </p>
           {habit.isSystem && (
-            <span className="text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full font-semibold uppercase tracking-[0.12em]">
-              Essencial
-            </span>
+            <img 
+              src={mascoteOculosEscuroImg} 
+              alt="Hábito essencial" 
+              className="h-5 w-auto flex-shrink-0 align-middle"
+              title="Hábito especial da aplicação"
+            />
           )}
         </div>
         <div className="flex items-center gap-2 mt-0.5">
