@@ -6,6 +6,8 @@ import { getTodayKey, getYesterdayKey, isHabitActiveToday, getLevel } from '@/ty
 const HABITS_KEY = 'habits-app-habits';
 const PROGRESS_KEY = 'habits-app-progress';
 const STATS_KEY = 'habits-app-stats';
+const PAUSE_CONSCIOUS_KEY = 'habits-app-pause-conscious-enabled';
+export const PAUSE_CONSCIOUS_HABIT_ID = 'pause-conscious-habit';
 
 function loadFromStorage<T>(key: string, fallback: T): T {
   try {
@@ -16,14 +18,42 @@ function loadFromStorage<T>(key: string, fallback: T): T {
   }
 }
 
+function loadBooleanFromStorage(key: string, fallback: boolean): boolean {
+  const value = loadFromStorage<string | null>(key, null);
+  if (value === null) return fallback;
+  return value === 'true' || value === true;
+}
+
 function saveToStorage(key: string, data: unknown) {
   localStorage.setItem(key, JSON.stringify(data));
+}
+
+function createPauseConsciousHabit(order: number): Habit {
+  return {
+    id: PAUSE_CONSCIOUS_HABIT_ID,
+    name: 'Pausa sem tela (desconectar por um momento)',
+    emoji: '🧘',
+    type: 'daily',
+    xpReward: 45,
+    createdAt: new Date().toISOString(),
+    order,
+    isSystem: true,
+  };
 }
 
 const DEFAULT_STATS: UserStats = { totalXp: 0, level: 1, currentStreak: 0, lastCompletedDate: null };
 
 export function useHabits() {
-  const [habits, setHabits] = useState<Habit[]>(() => loadFromStorage(HABITS_KEY, []));
+  const initialPauseEnabled = loadBooleanFromStorage(PAUSE_CONSCIOUS_KEY, false);
+  const [habits, setHabits] = useState<Habit[]>(() => {
+    const loaded = loadFromStorage<Habit[]>(HABITS_KEY, []);
+    if (initialPauseEnabled) {
+      const hasPause = loaded.some((h) => h.id === PAUSE_CONSCIOUS_HABIT_ID);
+      return hasPause ? loaded : [...loaded, createPauseConsciousHabit(loaded.length)];
+    }
+    return loaded.filter((h) => h.id !== PAUSE_CONSCIOUS_HABIT_ID);
+  });
+  const [pauseConsciousEnabled, setPauseConsciousEnabledState] = useState<boolean>(initialPauseEnabled);
   const [progress, setProgress] = useState<DayProgress>(() => {
     const today = getTodayKey();
     const saved = loadFromStorage<DayProgress>(PROGRESS_KEY, {
@@ -55,6 +85,21 @@ export function useHabits() {
   useEffect(() => saveToStorage(HABITS_KEY, habits), [habits]);
   useEffect(() => saveToStorage(PROGRESS_KEY, progress), [progress]);
   useEffect(() => saveToStorage(STATS_KEY, stats), [stats]);
+  useEffect(() => saveToStorage(PAUSE_CONSCIOUS_KEY, pauseConsciousEnabled), [pauseConsciousEnabled]);
+
+  useEffect(() => {
+    setHabits((prev) => {
+      const hasPause = prev.some((h) => h.id === PAUSE_CONSCIOUS_HABIT_ID);
+      if (pauseConsciousEnabled) {
+        return hasPause ? prev : [...prev, createPauseConsciousHabit(prev.length)];
+      }
+      return prev.filter((h) => h.id !== PAUSE_CONSCIOUS_HABIT_ID);
+    });
+    setProgress((prev) => ({
+      ...prev,
+      completedHabitIds: prev.completedHabitIds.filter((id) => id !== PAUSE_CONSCIOUS_HABIT_ID),
+    }));
+  }, [pauseConsciousEnabled]);
 
   const todayHabits = habits.filter(isHabitActiveToday);
 
@@ -68,7 +113,12 @@ export function useHabits() {
     setHabits(prev => [...prev, newHabit]);
   }, [habits.length]);
 
+  const setPauseConsciousEnabled = useCallback((enabled: boolean) => {
+    setPauseConsciousEnabledState(enabled);
+  }, []);
+
   const removeHabit = useCallback((id: string) => {
+    if (id === PAUSE_CONSCIOUS_HABIT_ID) return;
     setHabits(prev => prev.filter(h => h.id !== id));
     setProgress(prev => ({
       ...prev,
@@ -178,6 +228,8 @@ export function useHabits() {
     todayHabits,
     progress,
     stats,
+    pauseConsciousEnabled,
+    setPauseConsciousEnabled,
     addHabit,
     removeHabit,
     toggleHabit,

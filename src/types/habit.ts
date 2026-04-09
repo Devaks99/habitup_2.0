@@ -21,6 +21,7 @@ export interface Habit {
   xpReward: number;
   createdAt: string;
   order: number;
+  isSystem?: boolean;
 }
 
 export interface DayProgress {

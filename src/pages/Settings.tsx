@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { UserProfile } from '@/types/userProfile';
+import { useHabits } from '@/hooks/useHabits';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -16,6 +17,7 @@ interface SettingsProps {
 
 const Settings = ({ profile, onUpdate }: SettingsProps) => {
   const navigate = useNavigate();
+  const { pauseConsciousEnabled, setPauseConsciousEnabled } = useHabits();
   const [form, setForm] = useState(profile);
 
   useEffect(() => {
@@ -127,6 +129,27 @@ const Settings = ({ profile, onUpdate }: SettingsProps) => {
               Adicione um e-mail para ativar notificações.
             </p>
           )}
+        </section>
+
+        {/* Pause conscious habit */}
+        <section className="rounded-2xl bg-card border border-border p-5 space-y-3.5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium text-foreground">Pausa sem tela</p>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]">
+                  Essencial
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Ative para adicionar um hábito diário que lembra você a pausar um momento longe das telas, desacelerar e fazer algo fora do digital.
+              </p>
+            </div>
+            <Switch
+              checked={pauseConsciousEnabled}
+              onCheckedChange={(checked) => setPauseConsciousEnabled(checked)}
+            />
+          </div>
         </section>
 
         {/* Save */}

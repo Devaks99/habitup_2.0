@@ -78,12 +78,19 @@ function HabitCardContent({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className={cn(
-          "font-medium text-[13px] leading-tight transition-all duration-300",
-          completed ? "line-through text-muted-foreground/60" : "text-foreground"
-        )}>
-          {habit.name}
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className={cn(
+            "font-medium text-[13px] leading-tight transition-all duration-300",
+            completed ? "line-through text-muted-foreground/60" : "text-foreground"
+          )}>
+            {habit.name}
+          </p>
+          {habit.isSystem && (
+            <span className="text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full font-semibold uppercase tracking-[0.12em]">
+              Essencial
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2 mt-0.5">
           <p className={cn(
             "text-[11px] transition-colors duration-300",
@@ -115,15 +122,17 @@ function HabitCardContent({
       </AnimatePresence>
 
       {/* Delete button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove();
-        }}
-        className="flex-shrink-0 p-1.5 rounded-full text-muted-foreground/30 hover:text-destructive hover:bg-destructive/8 transition-all duration-200 opacity-0 group-hover:opacity-100"
-      >
-        <Trash2 className="w-3.5 h-3.5" />
-      </button>
+      {!habit.isSystem && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove();
+          }}
+          className="flex-shrink-0 p-1.5 rounded-full text-muted-foreground/30 hover:text-destructive hover:bg-destructive/8 transition-all duration-200 opacity-0 group-hover:opacity-100"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      )}
     </motion.div>
   );
 }
