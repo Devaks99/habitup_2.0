@@ -31,7 +31,7 @@ function saveToStorage(key: string, data: unknown) {
 function createPauseConsciousHabit(order: number): Habit {
   return {
     id: PAUSE_CONSCIOUS_HABIT_ID,
-    name: 'Pausa sem tela (desconectar por um momento)',
+    name: 'Pausa sem tela',
     emoji: '🧘',
     type: 'daily',
     xpReward: 45,

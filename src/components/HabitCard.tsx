@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import type { Habit } from '@/types/habit';
 import { WEEKDAY_LABELS } from '@/types/habit';
 import { cn } from '@/lib/utils';
-import { Check, Trash2, GripVertical } from 'lucide-react';
+import { Check, Trash2, GripVertical, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -24,6 +25,8 @@ function HabitCardContent({
   attributes,
   listeners,
 }: HabitCardProps & { isDragging?: boolean; attributes?: any; listeners?: any }) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <motion.div
       layout
@@ -104,6 +107,11 @@ function HabitCardContent({
             </span>
           )}
         </div>
+        {habit.isSystem && expanded && (
+          <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
+            Um lembrete diário para se desconectar das telas por um momento e descansar a mente.
+          </p>
+        )}
       </div>
 
       {/* XP popup */}
@@ -121,8 +129,24 @@ function HabitCardContent({
         )}
       </AnimatePresence>
 
-      {/* Delete button */}
-      {!habit.isSystem && (
+      {/* Expand description */}
+      {habit.isSystem ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setExpanded((prev) => !prev);
+          }}
+          className="flex-shrink-0 p-1 rounded-full text-muted-foreground/60 hover:text-foreground hover:bg-muted/10 transition-all duration-200"
+        >
+          <ChevronDown
+            className={cn(
+              'w-4 h-4 transition-transform duration-200',
+              expanded ? 'rotate-180' : 'rotate-0'
+            )}
+          />
+        </button>
+      ) : (
         <button
           onClick={(e) => {
             e.stopPropagation();
