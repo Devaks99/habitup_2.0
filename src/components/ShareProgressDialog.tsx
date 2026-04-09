@@ -5,7 +5,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Share2, Download, Check } from 'lucide-react';
+import { Share2, Download, Check, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -13,6 +13,24 @@ import mascotDefault from '@/assets/mascote_habitup.png';
 import mascotWaving from '@/assets/mascote_acenando_habitup.png';
 import mascotCelebration from '@/assets/mascote_comemoracao_habitup.png';
 import mascotSunglasses from '@/assets/mascote_oculos_escuro_habitup.png';
+import mascotHot from '@/assets/mascote_quente_habitup.png';
+import mascotHotSunglasses from '@/assets/mascote_quente_oculos_habitup.png';
+
+function getDefaultMascotId(streak: number) {
+  if (streak >= 5) return 'hot-sunglasses';
+  if (streak >= 3) return 'hot';
+  return 'default';
+}
+
+function getMascotUnlockThreshold(id: string) {
+  if (id === 'hot') return 3;
+  if (id === 'hot-sunglasses') return 5;
+  return 0;
+}
+
+function isMascotUnlocked(id: string, streak: number) {
+  return streak >= getMascotUnlockThreshold(id);
+}
 
 interface ShareProgressDialogProps {
   streak: number;
@@ -25,16 +43,23 @@ const MASCOTS = [
   { id: 'waving', src: mascotWaving, label: 'Acenando' },
   { id: 'celebration', src: mascotCelebration, label: 'Comemorando' },
   { id: 'sunglasses', src: mascotSunglasses, label: 'Estiloso' },
+  { id: 'hot', src: mascotHot, label: 'Quente' },
+  { id: 'hot-sunglasses', src: mascotHotSunglasses, label: 'Quente + Óculos' },
 ];
 
 export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDialogProps) {
-  const [selectedMascot, setSelectedMascot] = useState('default');
+  const [selectedMascot, setSelectedMascot] = useState(() => getDefaultMascotId(streak));
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const mascotImgRef = useRef<HTMLImageElement>(null);
 
+  useEffect(() => {
+    setSelectedMascot(prev => isMascotUnlocked(prev, streak) ? prev : getDefaultMascotId(streak));
+  }, [streak]);
+
+  const unlockedMascotIds = MASCOTS.filter(m => isMascotUnlocked(m.id, streak)).map(m => m.id);
   const mascot = MASCOTS.find(m => m.id === selectedMascot) || MASCOTS[0];
 
   const mascotImage = useImageToBase64(mascot.src);
@@ -152,38 +177,99 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
         {/* Mascot selector */}
         <div className="px-5 pb-4">
           <p className="text-[11px] text-muted-foreground mb-2.5">Escolha o mascote:</p>
-          <div className="flex gap-2">
-            {MASCOTS.map((m) => (
-              <button
-                key={m.id}
-                onClick={() => setSelectedMascot(m.id)}
-                className={`relative flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-200 ${
-                  selectedMascot === m.id
-                    ? 'bg-primary/10 ring-2 ring-primary/40'
-                    : 'bg-muted/40 hover:bg-muted/70'
-                }`}
-              >
-                <img src={m.src} alt={m.label} className="w-10 h-10 object-contain" />
-                <span className="text-[9px] text-muted-foreground font-medium">{m.label}</span>
-                {selectedMascot === m.id && (
-                  <motion.div
-                    layoutId="mascot-check"
-                    className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                  >
-                    <Check className="w-2.5 h-2.5 text-primary-foreground" />
-                  </motion.div>
-                )}
-              </button>
-            ))}
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {MASCOTS.filter(m => m.id !== 'hot' && m.id !== 'hot-sunglasses').map((m) => {
+              const isLocked = !unlockedMascotIds.includes(m.id);
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  disabled={isLocked}
+                  onClick={() => !isLocked && setSelectedMascot(m.id)}
+                  className={`relative flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-200 ${
+                    selectedMascot === m.id
+                      ? 'bg-primary/10 ring-2 ring-primary/40'
+                      : 'bg-muted/40 hover:bg-muted/70'
+                  } ${isLocked ? 'opacity-60 cursor-not-allowed' : ''}`}
+                >
+                  <div className="relative">
+                    <img src={m.src} alt={m.label} className="w-10 h-10 object-contain" />
+                  </div>
+                  <span className="text-[9px] text-muted-foreground font-medium">{m.label}</span>
+                  {selectedMascot === m.id && !isLocked && (
+                    <motion.div
+                      layoutId="mascot-check"
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    >
+                      <Check className="w-2.5 h-2.5 text-primary-foreground" />
+                    </motion.div>
+                  )}
+                </button>
+              );
+            })}
+            {MASCOTS.filter(m => m.id === 'hot' || m.id === 'hot-sunglasses').map((m) => {
+              const isLocked = !unlockedMascotIds.includes(m.id);
+              const unlockHint = isLocked
+                ? m.id === 'hot'
+                  ? 'Desbloqueie em 3 dias'
+                  : 'Desbloqueie em 5 dias'
+                : '';
+
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  disabled={isLocked}
+                  onClick={() => !isLocked && setSelectedMascot(m.id)}
+                  className={`relative flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-200 ${
+                    selectedMascot === m.id
+                      ? 'bg-primary/10 ring-2 ring-primary/40'
+                      : 'bg-muted/40 hover:bg-muted/70'
+                  } ${isLocked ? 'opacity-60 cursor-not-allowed' : ''}`}
+                >
+                  <div className="relative">
+                    <img src={m.src} alt={m.label} className="w-10 h-10 object-contain" />
+                    {isLocked && (
+                      <div className="absolute inset-0 rounded-xl bg-slate-950/10 flex items-center justify-center">
+                        <Lock className="w-3.5 h-3.5 text-slate-700" />
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-[9px] text-muted-foreground font-medium">{m.label}</span>
+                  {isLocked && unlockHint && (
+                    <span className="text-[8px] text-muted-foreground/80">{unlockHint}</span>
+                  )}
+                  {selectedMascot === m.id && !isLocked && (
+                    <motion.div
+                      layoutId="mascot-check"
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    >
+                      <Check className="w-2.5 h-2.5 text-primary-foreground" />
+                    </motion.div>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Card preview */}
         <div className="px-4 sm:px-5 pb-4 flex justify-center">
-          <div className="rounded-2xl overflow-hidden shadow-lg border border-border/50 w-full max-w-sm aspect-[4/5] sm:aspect-square">
+          <div className={`rounded-2xl overflow-hidden shadow-lg w-full max-w-sm aspect-[4/5] sm:aspect-square ${
+            streak >= 5
+              ? 'border-2 border-red-500/90 bg-red-50'
+              : streak >= 3
+              ? 'border-2 border-orange-400/90 bg-orange-50'
+              : streak > 0
+              ? 'border-2 border-amber-300/90 bg-amber-50'
+              : 'border border-border/50 bg-white'
+          }`}>
             <div
               ref={cardRef}
               style={{

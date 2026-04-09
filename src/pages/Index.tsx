@@ -12,6 +12,8 @@ import { getTodayWeekDay, getXpProgress, WEEKDAY_LABELS } from '@/types/habit';
 import mascotImg from '@/assets/mascote_habitup.png';
 import mascotWavingImg from '@/assets/mascote_acenando_habitup.png';
 import mascotCelebrationImg from '@/assets/mascote_comemoracao_habitup.png';
+import mascotHotImg from '@/assets/mascote_quente_habitup.png';
+import mascotHotSunglassesImg from '@/assets/mascote_quente_oculos_habitup.png';
 import type { UserProfile } from '@/types/userProfile';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Onboarding } from '@/components/Onboarding';
@@ -40,6 +42,63 @@ function getMotivationalText(pct: number, streak: boolean): string {
   if (pct >= 50) return 'Bom progresso!';
   if (streak) return 'Mantenha sua sequência!';
   return 'Vamos começar o dia!';
+}
+
+function getStreakMascot(streak: number, completionPerfect: boolean, showWaving: boolean) {
+  if (streak >= 5) return mascotHotSunglassesImg;
+  if (streak >= 3) return mascotHotImg;
+  if (completionPerfect) return mascotCelebrationImg;
+  if (showWaving) return mascotWavingImg;
+  return mascotImg;
+}
+
+function getProgressCardClasses(streak: number) {
+  if (streak >= 5) {
+    return 'rounded-2xl border-2 p-5 transition-all duration-500 bg-red-50 border-red-500/90';
+  }
+  if (streak >= 3) {
+    return 'rounded-2xl border-2 p-5 transition-all duration-500 bg-orange-50 border-orange-400/90';
+  }
+  if (streak > 0) {
+    return 'rounded-2xl border-2 p-5 transition-all duration-500 bg-amber-50 border-amber-300/90';
+  }
+  return 'rounded-2xl border p-5 transition-colors duration-500 bg-card border-border/80';
+}
+
+function getProgressCardTextStyles(streak: number) {
+  if (streak >= 5) {
+    return {
+      body: 'text-[#38241f]',
+      muted: 'text-[#6f4a45]',
+      streakPill: 'bg-red-100 text-[#7b1f1f]',
+      summary: 'text-[#62403c]',
+    };
+  }
+
+  if (streak >= 3) {
+    return {
+      body: 'text-[#43322c]',
+      muted: 'text-[#7c554a]',
+      streakPill: 'bg-orange-100 text-[#8d4517]',
+      summary: 'text-[#6d4c40]',
+    };
+  }
+
+  if (streak > 0) {
+    return {
+      body: 'text-[#4d3f2f]',
+      muted: 'text-[#836f4a]',
+      streakPill: 'bg-amber-100 text-[#7d5f0e]',
+      summary: 'text-[#735f3f]',
+    };
+  }
+
+  return {
+    body: 'text-[#525252]',
+    muted: 'text-[#6b6b6b]',
+    streakPill: 'bg-muted text-muted-foreground',
+    summary: 'text-[#525252]',
+  };
 }
 
 interface IndexProps {
@@ -98,6 +157,7 @@ const Index = ({ profile }: IndexProps) => {
   const greeting = getGreeting();
   const xpProgress = getXpProgress(stats.totalXp);
   const hasStreak = stats.currentStreak > 0;
+  const progressCardText = getProgressCardTextStyles(stats.currentStreak);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { distance: 8 }),
@@ -193,11 +253,7 @@ const Index = ({ profile }: IndexProps) => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className={`rounded-2xl border p-5 transition-colors duration-500 ${
-              hasStreak
-                ? 'bg-gradient-to-br from-accent/6 to-card border-accent/30'
-                : 'bg-card border-border/80'
-            }`}
+            className={getProgressCardClasses(stats.currentStreak)}
           >
             <div className="flex items-center gap-5">
               {/* Circular progress */}
@@ -226,24 +282,18 @@ const Index = ({ profile }: IndexProps) => {
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <AnimatePresence mode="wait">
                         <motion.img
-                          src={
-                            completionPercentage === 100
-                              ? mascotCelebrationImg
-                              : showWaving
-                              ? mascotWavingImg
-                              : mascotImg
-                          }
+                          src={getStreakMascot(stats.currentStreak, completionPercentage === 100, showWaving)}
                           alt="HabitUp mascote"
                           className="w-14 h-14 object-contain mb-0.5 cursor-pointer"
                           onClick={triggerWaving}
-                          key={completionPercentage === 100 ? 'celebration' : showWaving ? 'waving' : 'normal'}
+                          key={`${stats.currentStreak}-${completionPercentage === 100 ? 'celebration' : showWaving ? 'waving' : 'normal'}`}
                           initial={{ scale: 0.8, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
                           exit={{ scale: 0.8, opacity: 0 }}
                           transition={{ duration: 0.5, ease: 'easeInOut' }}
                         />
                       </AnimatePresence>
-                      <span className="text-[11px] font-display font-bold text-foreground leading-none">
+                      <span className={`text-[11px] font-display font-bold leading-none ${progressCardText.body}`}>
                         {completionPercentage}%
                       </span>
                     </div>
@@ -252,7 +302,7 @@ const Index = ({ profile }: IndexProps) => {
                   <div className="w-[120px] h-[120px] flex items-center justify-center">
                     <AnimatePresence mode="wait">
                       <motion.img
-                        src={showWaving ? mascotWavingImg : mascotImg}
+                        src={getStreakMascot(stats.currentStreak, false, showWaving)}
                         alt="HabitUp mascote"
                         className="w-24 h-24 object-contain cursor-pointer"
                         onClick={triggerWaving}
@@ -269,7 +319,7 @@ const Index = ({ profile }: IndexProps) => {
 
               {/* Stats column */}
               <div className="flex-1 min-w-0 space-y-2.5">
-                <p className="text-[13px] text-muted-foreground leading-snug">
+                <p className={`text-[13px] leading-snug ${progressCardText.muted}`}>
                   {todayHabits.length > 0
                     ? getMotivationalText(completionPercentage, hasStreak)
                     : 'Adicione seu primeiro hábito!'}
@@ -278,7 +328,7 @@ const Index = ({ profile }: IndexProps) => {
                 {/* Streak + Level pills */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all duration-500 ${
-                    hasStreak ? 'bg-accent/15 text-accent' : 'bg-muted text-muted-foreground'
+                    hasStreak ? progressCardText.streakPill : 'bg-muted text-muted-foreground'
                   }`}>
                     <Flame className="w-3 h-3" />
                     {stats.currentStreak} {stats.currentStreak === 1 ? 'dia' : 'dias'}
@@ -292,8 +342,8 @@ const Index = ({ profile }: IndexProps) => {
                 {/* XP bar */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-muted-foreground">{stats.totalXp} XP total</span>
-                    <span className="text-[10px] text-muted-foreground">{xpProgress}/100</span>
+                    <span className={`text-[10px] ${progressCardText.muted}`}>{stats.totalXp} XP total</span>
+                    <span className={`text-[10px] ${progressCardText.muted}`}>{xpProgress}/100</span>
                   </div>
                   <Progress value={xpProgress} className="h-1.5 bg-secondary [&>div]:bg-xp [&>div]:transition-all [&>div]:duration-500" />
                 </div>
@@ -303,17 +353,17 @@ const Index = ({ profile }: IndexProps) => {
             {/* Habit count summary */}
             <div className="flex flex-col sm:flex-row sm:items-center pt-6 sm:pt-3.5 border-t border-border/50 gap-3 sm:gap-4">
               <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 sm:gap-4 flex-1 max-w-sm mx-auto sm:mx-0">
-                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <div className={`flex items-center gap-1.5 text-[11px] ${progressCardText.summary}`}>
                   <Repeat className="w-3 h-3" />
                   <span>{dailyHabits.length} diário{dailyHabits.length !== 1 ? 's' : ''}</span>
                 </div>
                 <div className="hidden sm:block w-px h-4 bg-border mx-3 sm:mx-0" />
-                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <div className={`flex items-center gap-1.5 text-[11px] ${progressCardText.summary}`}>
                   <Calendar className="w-3 h-3" />
                   <span>{scheduledHabits.length} programado{scheduledHabits.length !== 1 ? 's' : ''}</span>
                 </div>
                 <div className="hidden sm:block w-px h-4 bg-border mx-3 sm:mx-0" />
-                <div className="text-[11px] text-muted-foreground">
+                <div className={`text-[11px] ${progressCardText.summary}`}>
                   {habits.length} total
                 </div>
               </div>
