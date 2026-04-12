@@ -51,25 +51,40 @@ export function getXpProgress(xp: number): number {
   return xp % 100;
 }
 
-export function getTodayKey(): string {
-  return new Date().toISOString().split('T')[0];
+function padDatePart(value: number): string {
+  return value.toString().padStart(2, '0');
 }
 
-export function getYesterdayKey(): string {
-  const d = new Date();
+export function getDateKey(date: Date = new Date()): string {
+  const year = date.getFullYear();
+  const month = padDatePart(date.getMonth() + 1);
+  const day = padDatePart(date.getDate());
+  return `${year}-${month}-${day}`;
+}
+
+export function getTodayKey(date: Date = new Date()): string {
+  return getDateKey(date);
+}
+
+export function getYesterdayKey(date: Date = new Date()): string {
+  const d = new Date(date);
   d.setDate(d.getDate() - 1);
-  return d.toISOString().split('T')[0];
+  return getDateKey(d);
 }
 
-export function getTodayWeekDay(): WeekDay {
+export function getTodayWeekDay(date: Date = new Date()): WeekDay {
   const days: WeekDay[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-  return days[new Date().getDay()];
+  return days[date.getDay()];
+}
+
+export function isHabitActiveOnDate(habit: Habit, date: Date = new Date()): boolean {
+  if (habit.type === 'daily') return true;
+  const today = getTodayWeekDay(date);
+  return habit.scheduledDays?.includes(today) ?? false;
 }
 
 export function isHabitActiveToday(habit: Habit): boolean {
-  if (habit.type === 'daily') return true;
-  const today = getTodayWeekDay();
-  return habit.scheduledDays?.includes(today) ?? false;
+  return isHabitActiveOnDate(habit);
 }
 
 export const COMPLETION_MESSAGES = [

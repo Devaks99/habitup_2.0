@@ -63,39 +63,113 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
   const mascot = MASCOTS.find(m => m.id === selectedMascot) || MASCOTS[0];
 
   const mascotImage = useImageToBase64(mascot.src);
+  const captureImageSrc = mascotImage.base64 ?? mascot.src;
   const isMascotReady = mascotImage.status === 'ready';
   const isReadyToCapture = isMascotReady && imageLoaded && !isGenerating;
 
   useEffect(() => {
     setImageLoaded(false);
-  }, [mascot.src]);
+  }, [captureImageSrc]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const preloadCaptureImage = async () => {
+      if (!captureImageSrc) {
+        setImageLoaded(false);
+        return;
+      }
+
+      setImageLoaded(false);
+
+      const img = new Image();
+      img.decoding = 'sync';
+
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const cleanup = () => {
+            img.onload = null;
+            img.onerror = null;
+          };
+
+          img.onload = () => {
+            cleanup();
+            resolve();
+          };
+
+          img.onerror = () => {
+            cleanup();
+            reject(new Error(`Failed to preload image: ${captureImageSrc}`));
+          };
+
+          img.src = captureImageSrc;
+
+          if (img.complete) {
+            cleanup();
+            resolve();
+          }
+        });
+
+        await img.decode().catch(() => undefined);
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
+
+        if (!cancelled) {
+          setImageLoaded(true);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Failed to preload mascot for capture:', error);
+          setImageLoaded(false);
+        }
+      }
+    };
+
+    preloadCaptureImage();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [captureImageSrc]);
 
   const ensureImagePainted = useCallback(async () => {
-    if (mascotImgRef.current) {
-      // Wait for image to decode
-      await mascotImgRef.current.decode().catch(() => undefined);
+    if (!cardRef.current) return;
 
-      // Double-check that image is complete
-      if (!mascotImgRef.current.complete) {
-        await new Promise(resolve => {
-          const checkComplete = () => {
-            if (mascotImgRef.current?.complete) {
-              resolve(void 0);
-            } else {
-              setTimeout(checkComplete, 10);
-            }
+    const images = Array.from(cardRef.current.querySelectorAll('img'));
+
+    await Promise.all(images.map(async (img) => {
+      if (!img.complete) {
+        await new Promise<void>((resolve, reject) => {
+          const cleanup = () => {
+            img.removeEventListener('load', onLoad);
+            img.removeEventListener('error', onError);
           };
-          checkComplete();
+
+          const onLoad = () => {
+            cleanup();
+            resolve();
+          };
+
+          const onError = () => {
+            cleanup();
+            reject(new Error(`Failed to load image for capture: ${img.currentSrc || img.src}`));
+          };
+
+          img.addEventListener('load', onLoad, { once: true });
+          img.addEventListener('error', onError, { once: true });
         });
       }
 
-      // Wait for multiple animation frames to ensure painting is complete
-      await new Promise(requestAnimationFrame);
-      await new Promise(requestAnimationFrame);
-      await new Promise(requestAnimationFrame);
+      await img.decode().catch(() => undefined);
+    }));
 
-      // Small additional delay to ensure browser has finished painting
-      await new Promise(resolve => setTimeout(resolve, 150));
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+    await new Promise(resolve => setTimeout(resolve, 150));
+
+    if (mascotImgRef.current && !mascotImgRef.current.complete) {
+      throw new Error('Mascot image is not ready for capture');
     }
   }, []);
 
@@ -315,18 +389,12 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
               ) : (
                 <img
                   ref={mascotImgRef}
-                  src={mascotImage.base64 ?? mascot.src}
+                  src={captureImageSrc}
                   alt="Mascote"
                   style={{
                     width: 120, height: 120, objectFit: 'contain',
                     marginBottom: 20,
                     filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.08))',
-                  }}
-                  onLoad={() => {
-                    // Ensure image is fully loaded and painted before setting state
-                    if (mascotImgRef.current?.complete) {
-                      setImageLoaded(true);
-                    }
                   }}
                   onError={() => console.error('Mascot image load failed:', mascot.src)}
                 />
