@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { UserProfile } from '@/types/userProfile';
 import { useHabits } from '@/hooks/useHabits';
+import { StreakWarningDialog } from '@/components/StreakWarningDialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Bell, Save } from 'lucide-react';
+import { ArrowLeft, Bell, Eye, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SettingsProps {
@@ -19,6 +20,7 @@ const Settings = ({ profile, onUpdate }: SettingsProps) => {
   const navigate = useNavigate();
   const { pauseConsciousEnabled, setPauseConsciousEnabled } = useHabits();
   const [form, setForm] = useState(profile);
+  const [showWarningPreview, setShowWarningPreview] = useState(false);
 
   useEffect(() => {
     setForm(profile);
@@ -152,6 +154,27 @@ const Settings = ({ profile, onUpdate }: SettingsProps) => {
           </div>
         </section>
 
+        <section className="rounded-2xl bg-card border border-border p-5 space-y-3.5">
+          <div className="space-y-1.5">
+            <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-widest">
+              Experiência
+            </h2>
+            <p className="text-[12px] leading-relaxed text-muted-foreground">
+              Veja como aparece o aviso de proteção da sequência para entender a mensagem e o visual antes que ele seja exibido automaticamente.
+            </p>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowWarningPreview(true)}
+            className="w-full h-11 rounded-full gap-2 border-border bg-background text-foreground hover:bg-muted/50"
+          >
+            <Eye className="w-4 h-4" />
+            Visualizar modal de sequência
+          </Button>
+        </section>
+
         {/* Save */}
         <Button
           onClick={handleSave}
@@ -162,6 +185,13 @@ const Settings = ({ profile, onUpdate }: SettingsProps) => {
           Salvar
         </Button>
       </div>
+
+      <StreakWarningDialog
+        open={showWarningPreview}
+        onOpenChange={setShowWarningPreview}
+        title="Prévia do aviso de sequência"
+        confirmLabel="Entendi"
+      />
     </div>
   );
 };

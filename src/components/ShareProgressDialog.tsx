@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useImageToBase64 } from '@/hooks/useImageToBase64';
-import { toPng } from 'html-to-image';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
@@ -9,28 +8,14 @@ import { Share2, Download, Check, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 
-import mascotDefault from '@/assets/mascote_habitup.png';
-import mascotWaving from '@/assets/mascote_acenando_habitup.png';
-import mascotCelebration from '@/assets/mascote_comemoracao_habitup.png';
-import mascotSunglasses from '@/assets/mascote_oculos_escuro_habitup.png';
-import mascotHot from '@/assets/mascote_quente_habitup.png';
-import mascotHotSunglasses from '@/assets/mascote_quente_oculos_habitup.png';
-
-function getDefaultMascotId(streak: number) {
-  if (streak >= 5) return 'hot-sunglasses';
-  if (streak >= 3) return 'hot';
-  return 'default';
-}
-
-function getMascotUnlockThreshold(id: string) {
-  if (id === 'hot') return 3;
-  if (id === 'hot-sunglasses') return 5;
-  return 0;
-}
-
-function isMascotUnlocked(id: string, streak: number) {
-  return streak >= getMascotUnlockThreshold(id);
-}
+import {
+  SHARE_MASCOTS,
+  ShareMascotId,
+  getDefaultMascotId,
+  getMascotUnlockThreshold,
+  getStreakTheme,
+  isMascotUnlocked,
+} from '@/lib/streakTheme';
 
 interface ShareProgressDialogProps {
   streak: number;
@@ -38,176 +23,256 @@ interface ShareProgressDialogProps {
   totalXp: number;
 }
 
-const MASCOTS = [
-  { id: 'default', src: mascotDefault, label: 'Padrão' },
-  { id: 'waving', src: mascotWaving, label: 'Acenando' },
-  { id: 'celebration', src: mascotCelebration, label: 'Comemorando' },
-  { id: 'sunglasses', src: mascotSunglasses, label: 'Estiloso' },
-  { id: 'hot', src: mascotHot, label: 'Quente' },
-  { id: 'hot-sunglasses', src: mascotHotSunglasses, label: 'Quente + Óculos' },
-];
+function getCanvasPalette(tone: ReturnType<typeof getStreakTheme>['tone']) {
+  switch (tone) {
+    case 'purple-bolt':
+      return {
+        backgroundStops: ['#f4eefe', '#efe4ff', '#efe0ff', '#f6ebff'],
+        frameColor: '#8b5cf6',
+        topGlow: 'rgba(139, 92, 246, 0.16)',
+        bottomGlow: 'rgba(168, 85, 247, 0.18)',
+      };
+    case 'purple':
+      return {
+        backgroundStops: ['#fff1fb', '#f9e8ff', '#f4e4ff', '#fff3fb'],
+        frameColor: '#d946ef',
+        topGlow: 'rgba(217, 70, 239, 0.15)',
+        bottomGlow: 'rgba(192, 38, 211, 0.16)',
+      };
+    case 'red':
+      return {
+        backgroundStops: ['#fff2ef', '#ffe7e0', '#fff0ea', '#fff7f3'],
+        frameColor: '#ef4444',
+        topGlow: 'rgba(239, 68, 68, 0.14)',
+        bottomGlow: 'rgba(251, 146, 60, 0.16)',
+      };
+    case 'orange':
+      return {
+        backgroundStops: ['#fff7ee', '#ffefd9', '#fff5e8', '#fffaf2'],
+        frameColor: '#fb923c',
+        topGlow: 'rgba(251, 146, 60, 0.14)',
+        bottomGlow: 'rgba(245, 158, 11, 0.16)',
+      };
+    case 'amber':
+      return {
+        backgroundStops: ['#fffaf0', '#fff3d6', '#fff8e7', '#fffcf3'],
+        frameColor: '#fbbf24',
+        topGlow: 'rgba(251, 191, 36, 0.14)',
+        bottomGlow: 'rgba(245, 158, 11, 0.14)',
+      };
+    default:
+      return {
+        backgroundStops: ['#e8f5e8', '#f0f7e8', '#fdf8ef', '#fff9f0'],
+        frameColor: '#e7dfd1',
+        topGlow: 'rgba(76, 175, 80, 0.10)',
+        bottomGlow: 'rgba(255, 183, 77, 0.12)',
+      };
+  }
+}
+
+function drawRoundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
+function loadCanvasImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.decoding = 'async';
+
+    img.onload = async () => {
+      await img.decode().catch(() => undefined);
+      resolve(img);
+    };
+
+    img.onerror = () => {
+      reject(new Error(`Failed to load image for canvas generation: ${src}`));
+    };
+
+    img.src = src;
+  });
+}
 
 export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDialogProps) {
-  const [selectedMascot, setSelectedMascot] = useState(() => getDefaultMascotId(streak));
+  const [open, setOpen] = useState(false);
+  const [selectedMascot, setSelectedMascot] = useState<ShareMascotId>(() => getDefaultMascotId(streak));
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const mascotImgRef = useRef<HTMLImageElement>(null);
+  const streakTheme = getStreakTheme(streak);
 
   useEffect(() => {
     setSelectedMascot(prev => isMascotUnlocked(prev, streak) ? prev : getDefaultMascotId(streak));
   }, [streak]);
 
-  const unlockedMascotIds = MASCOTS.filter(m => isMascotUnlocked(m.id, streak)).map(m => m.id);
-  const mascot = MASCOTS.find(m => m.id === selectedMascot) || MASCOTS[0];
+  useEffect(() => {
+    if (!open) {
+      setCopied(false);
+    }
+  }, [open]);
+
+  const unlockedMascotIds = SHARE_MASCOTS.filter(m => isMascotUnlocked(m.id, streak)).map(m => m.id);
+  const mascot = SHARE_MASCOTS.find(m => m.id === selectedMascot) || SHARE_MASCOTS[0];
 
   const mascotImage = useImageToBase64(mascot.src);
   const captureImageSrc = mascotImage.base64 ?? mascot.src;
   const isMascotReady = mascotImage.status === 'ready';
-  const isReadyToCapture = isMascotReady && imageLoaded && !isGenerating;
+  const isReadyToCapture = isMascotReady && !isGenerating;
 
-  useEffect(() => {
-    setImageLoaded(false);
-  }, [captureImageSrc]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const preloadCaptureImage = async () => {
-      if (!captureImageSrc) {
-        setImageLoaded(false);
-        return;
-      }
-
-      setImageLoaded(false);
-
-      const img = new Image();
-      img.decoding = 'sync';
-
-      try {
-        await new Promise<void>((resolve, reject) => {
-          const cleanup = () => {
-            img.onload = null;
-            img.onerror = null;
-          };
-
-          img.onload = () => {
-            cleanup();
-            resolve();
-          };
-
-          img.onerror = () => {
-            cleanup();
-            reject(new Error(`Failed to preload image: ${captureImageSrc}`));
-          };
-
-          img.src = captureImageSrc;
-
-          if (img.complete) {
-            cleanup();
-            resolve();
-          }
-        });
-
-        await img.decode().catch(() => undefined);
-        await new Promise(requestAnimationFrame);
-        await new Promise(requestAnimationFrame);
-
-        if (!cancelled) {
-          setImageLoaded(true);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          console.error('Failed to preload mascot for capture:', error);
-          setImageLoaded(false);
-        }
-      }
-    };
-
-    preloadCaptureImage();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [captureImageSrc]);
-
-  const ensureImagePainted = useCallback(async () => {
-    if (!cardRef.current) return;
-
-    const images = Array.from(cardRef.current.querySelectorAll('img'));
-
-    await Promise.all(images.map(async (img) => {
-      if (!img.complete) {
-        await new Promise<void>((resolve, reject) => {
-          const cleanup = () => {
-            img.removeEventListener('load', onLoad);
-            img.removeEventListener('error', onError);
-          };
-
-          const onLoad = () => {
-            cleanup();
-            resolve();
-          };
-
-          const onError = () => {
-            cleanup();
-            reject(new Error(`Failed to load image for capture: ${img.currentSrc || img.src}`));
-          };
-
-          img.addEventListener('load', onLoad, { once: true });
-          img.addEventListener('error', onError, { once: true });
-        });
-      }
-
-      await img.decode().catch(() => undefined);
-    }));
-
-    await new Promise(requestAnimationFrame);
-    await new Promise(requestAnimationFrame);
-    await new Promise(requestAnimationFrame);
-    await new Promise(resolve => setTimeout(resolve, 150));
-
-    if (mascotImgRef.current && !mascotImgRef.current.complete) {
-      throw new Error('Mascot image is not ready for capture');
+  const generateShareImageBlob = useCallback(async () => {
+    if (!captureImageSrc) {
+      throw new Error('Mascot image source is not available');
     }
-  }, []);
+
+    await document.fonts?.ready;
+
+    const mascotCanvasImage = await loadCanvasImage(captureImageSrc);
+    const palette = getCanvasPalette(streakTheme.tone);
+
+    const width = 1080;
+    const height = 1350;
+    const frameInset = 12;
+    const innerInset = 22;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      throw new Error('Failed to create canvas context');
+    }
+
+    const backgroundGradient = ctx.createLinearGradient(0, 0, width, height);
+    backgroundGradient.addColorStop(0, palette.backgroundStops[0]);
+    backgroundGradient.addColorStop(0.35, palette.backgroundStops[1]);
+    backgroundGradient.addColorStop(0.7, palette.backgroundStops[2]);
+    backgroundGradient.addColorStop(1, palette.backgroundStops[3]);
+
+    ctx.fillStyle = palette.frameColor;
+    drawRoundedRect(ctx, frameInset, frameInset, width - frameInset * 2, height - frameInset * 2, 38);
+    ctx.fill();
+
+    ctx.save();
+    drawRoundedRect(ctx, innerInset, innerInset, width - innerInset * 2, height - innerInset * 2, 32);
+    ctx.clip();
+    ctx.fillStyle = backgroundGradient;
+    ctx.fillRect(innerInset, innerInset, width - innerInset * 2, height - innerInset * 2);
+
+    const topGlow = ctx.createRadialGradient(width - 180, 130, 30, width - 180, 130, 210);
+    topGlow.addColorStop(0, palette.topGlow);
+    topGlow.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = topGlow;
+    ctx.fillRect(width - 420, -20, 420, 420);
+
+    const bottomGlow = ctx.createRadialGradient(170, height - 180, 24, 170, height - 180, 180);
+    bottomGlow.addColorStop(0, palette.bottomGlow);
+    bottomGlow.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = bottomGlow;
+    ctx.fillRect(-10, height - 380, 380, 380);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = streakTheme.shareAccentColor;
+    ctx.font = '700 48px "Space Grotesk", sans-serif';
+    ctx.fillText('Habit', width / 2 - 28, 170);
+    ctx.fillStyle = '#d4943a';
+    ctx.font = '800 48px "Space Grotesk", sans-serif';
+    ctx.fillText('Up', width / 2 + 96, 170);
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(15, 23, 42, 0.10)';
+    ctx.shadowBlur = 28;
+    ctx.drawImage(mascotCanvasImage, width / 2 - 180, 240, 360, 360);
+    ctx.restore();
+
+    ctx.fillStyle = '#2d2d2d';
+    ctx.font = '800 164px "Space Grotesk", sans-serif';
+    ctx.fillText(String(streak), width / 2 - 150, 760);
+    ctx.fillText(String(level), width / 2 + 150, 760);
+
+    ctx.strokeStyle = 'rgba(15, 23, 42, 0.12)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(width / 2, 660);
+    ctx.lineTo(width / 2, 820);
+    ctx.stroke();
+
+    ctx.fillStyle = streakTheme.shareStreakLabelColor;
+    ctx.font = '700 28px Inter, sans-serif';
+    ctx.fillText('DIAS', width / 2 - 150, 810);
+
+    ctx.fillStyle = streakTheme.shareAccentColor;
+    ctx.fillText('NÍVEL', width / 2 + 150, 810);
+
+    ctx.fillStyle = '#7a7a7a';
+    ctx.font = '500 32px Inter, sans-serif';
+    ctx.fillText(`${totalXp} XP acumulados`, width / 2, 900);
+
+    ctx.strokeStyle = 'rgba(15, 23, 42, 0.06)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(128, 980);
+    ctx.lineTo(width - 128, 980);
+    ctx.stroke();
+
+    ctx.fillStyle = '#a0a0a0';
+    ctx.font = '500 24px Inter, sans-serif';
+    ctx.fillText('Construindo hábitos, um dia de cada vez', width / 2, 1038);
+
+    ctx.restore();
+
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((value) => {
+        if (!value) {
+          reject(new Error('Failed to export canvas image'));
+          return;
+        }
+        resolve(value);
+      }, 'image/png');
+    });
+
+    return blob;
+  }, [captureImageSrc, level, streak, streakTheme, totalXp]);
 
   const handleDownload = useCallback(async () => {
-    if (!cardRef.current || !imageLoaded) return;
+    if (!isReadyToCapture) return;
     setIsGenerating(true);
     try {
-      console.log('Starting download process...');
-      await ensureImagePainted();
-      console.log('Image painted, capturing...');
-      const dataUrl = await toPng(cardRef.current, {
-        pixelRatio: 3,
-        cacheBust: true,
-      });
-      console.log('Generated image dataUrl length:', dataUrl.length);
+      const blob = await generateShareImageBlob();
+      const dataUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.download = `habitup-progresso.png`;
       link.href = dataUrl;
       link.click();
-      console.log('Download initiated');
+      setTimeout(() => URL.revokeObjectURL(dataUrl), 1000);
     } catch (err) {
       console.error('Failed to generate image:', err);
     } finally {
       setIsGenerating(false);
     }
-  }, [ensureImagePainted, imageLoaded]);
+  }, [generateShareImageBlob, isReadyToCapture]);
 
   const handleShare = useCallback(async () => {
-    if (!cardRef.current || !imageLoaded) return;
+    if (!isReadyToCapture) return;
     setIsGenerating(true);
     try {
-      await ensureImagePainted();
-      const dataUrl = await toPng(cardRef.current, {
-        pixelRatio: 3,
-        cacheBust: true,
-      });
-      console.log('Share image dataUrl length:', dataUrl.length); // Debug
-      const blob = await (await fetch(dataUrl)).blob();
+      const blob = await generateShareImageBlob();
       const file = new File([blob], 'habitup-progresso.png', { type: 'image/png' });
 
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
@@ -229,10 +294,10 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
     } finally {
       setIsGenerating(false);
     }
-  }, [ensureImagePainted, streak, level, imageLoaded]);
+  }, [generateShareImageBlob, streak, level, isReadyToCapture]);
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           variant="ghost"
@@ -252,7 +317,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
         <div className="px-5 pb-4">
           <p className="text-[11px] text-muted-foreground mb-2.5">Escolha o mascote:</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {MASCOTS.filter(m => m.id !== 'hot' && m.id !== 'hot-sunglasses').map((m) => {
+            {SHARE_MASCOTS.filter(m => m.unlockAt === 0).map((m) => {
               const isLocked = !unlockedMascotIds.includes(m.id);
               return (
                 <button
@@ -284,13 +349,9 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
                 </button>
               );
             })}
-            {MASCOTS.filter(m => m.id === 'hot' || m.id === 'hot-sunglasses').map((m) => {
+            {SHARE_MASCOTS.filter(m => m.unlockAt > 0).map((m) => {
               const isLocked = !unlockedMascotIds.includes(m.id);
-              const unlockHint = isLocked
-                ? m.id === 'hot'
-                  ? 'Desbloqueie em 3 dias'
-                  : 'Desbloqueie em 5 dias'
-                : '';
+              const unlockHint = isLocked ? `Desbloqueie em ${getMascotUnlockThreshold(m.id)} dias` : '';
 
               return (
                 <button
@@ -335,21 +396,13 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
 
         {/* Card preview */}
         <div className="px-4 sm:px-5 pb-4 flex justify-center">
-          <div className={`rounded-2xl overflow-hidden shadow-lg w-full max-w-sm aspect-[4/5] sm:aspect-square ${
-            streak >= 5
-              ? 'border-2 border-red-500/90 bg-red-50'
-              : streak >= 3
-              ? 'border-2 border-orange-400/90 bg-orange-50'
-              : streak > 0
-              ? 'border-2 border-amber-300/90 bg-amber-50'
-              : 'border border-border/50 bg-white'
-          }`}>
+          <div className={`rounded-2xl overflow-hidden shadow-lg w-full max-w-sm aspect-[4/5] sm:aspect-square ${streakTheme.shareFrameClassName}`}>
             <div
               ref={cardRef}
               style={{
                 width: '100%',
                 height: '100%',
-                background: 'linear-gradient(145deg, #e8f5e8 0%, #f0f7e8 30%, #fdf8ef 60%, #fff9f0 100%)',
+                background: streakTheme.shareBackground,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -363,19 +416,19 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
               <div style={{
                 position: 'absolute', top: -30, right: -30,
                 width: 120, height: 120, borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(76, 175, 80, 0.08) 0%, transparent 70%)',
+                background: streakTheme.shareGlowTop,
               }} />
               <div style={{
                 position: 'absolute', bottom: -20, left: -20,
                 width: 90, height: 90, borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(255, 183, 77, 0.1) 0%, transparent 70%)',
+                background: streakTheme.shareGlowBottom,
               }} />
 
               {/* Brand */}
               <div style={{ marginBottom: 16 }}>
                 <span style={{
                   fontSize: 16, fontWeight: 700, letterSpacing: '-0.02em',
-                  color: '#4a8c5c',
+                  color: streakTheme.shareAccentColor,
                 }}>Habit</span>
                 <span style={{
                   fontSize: 16, fontWeight: 800, letterSpacing: '-0.02em',
@@ -388,7 +441,6 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
                 <Skeleton className="w-[120px] h-[120px] rounded-2xl mx-auto mb-5" />
               ) : (
                 <img
-                  ref={mascotImgRef}
                   src={captureImageSrc}
                   alt="Mascote"
                   style={{
@@ -415,7 +467,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
                   </div>
                   <div style={{
                     fontSize: 11, fontWeight: 700, textTransform: 'uppercase' as const,
-                    letterSpacing: '0.12em', color: '#e67e22', marginTop: 5,
+                    letterSpacing: '0.12em', color: streakTheme.shareStreakLabelColor, marginTop: 5,
                     display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center',
                   }}>
                     🔥 dias
@@ -438,7 +490,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
                   </div>
                   <div style={{
                     fontSize: 11, fontWeight: 700, textTransform: 'uppercase' as const,
-                    letterSpacing: '0.12em', color: '#4a8c5c', marginTop: 5,
+                    letterSpacing: '0.12em', color: streakTheme.shareAccentColor, marginTop: 5,
                     display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center',
                   }}>
                     ⭐ nível
@@ -475,7 +527,7 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
           <p className="text-[11px] text-muted-foreground text-center">
             {isReadyToCapture
               ? 'Pronto para gerar a imagem com o mascote completo.'
-              : 'Aguarde até o mascote carregar completamente antes de baixar.'}
+              : 'Preparando o mascote para a primeira geração da imagem.'}
           </p>
         </div>
 
@@ -483,10 +535,10 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
         <div className="px-5 pb-5 flex flex-col sm:flex-row gap-2">
           <Button
             onClick={handleDownload}
-            disabled={isGenerating || !isMascotReady || !imageLoaded}
+            disabled={isGenerating || !isReadyToCapture}
             className="flex-1 rounded-full gap-2 bg-primary text-primary-foreground h-10 text-sm font-medium hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-all"
           >
-            {!isMascotReady || !imageLoaded ? (
+            {!isReadyToCapture ? (
               'Preparando...'
             ) : isGenerating ? (
               'Gerando...'
@@ -499,10 +551,10 @@ export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDia
           </Button>
           <Button
             onClick={handleShare}
-            disabled={isGenerating || !isMascotReady || !imageLoaded}
+            disabled={isGenerating || !isReadyToCapture}
             className="flex-1 rounded-full gap-2 h-10 text-sm font-medium border-2 border-primary bg-primary/5 text-primary hover:bg-primary/10 disabled:border-muted disabled:bg-muted/20 disabled:text-muted-foreground disabled:cursor-not-allowed transition-all"
           >
-            {!isMascotReady || !imageLoaded ? (
+            {!isReadyToCapture ? (
               'Preparando...'
             ) : isGenerating ? (
               'Gerando...'

@@ -33,7 +33,7 @@ export function XpBar({ stats }: XpBarProps) {
         </div>
       </div>
       <div className="space-y-1.5">
-        <Progress value={percentage} className="h-2.5 bg-secondary [&>div]:bg-xp" />
+        <Progress value={percentage} className="h-2.5 bg-secondary" indicatorClassName="bg-xp" />
         <p className="text-xs text-muted-foreground text-right">
           {currentProgress} / {needed} XP para o nível {stats.level + 1}
         </p>

@@ -24,7 +24,7 @@ export function DailyProgress({ percentage, completed, total }: DailyProgressPro
           {completed}/{total} hábitos
         </p>
       </div>
-      <Progress value={percentage} className="h-2.5 bg-secondary [&>div]:bg-primary" />
+      <Progress value={percentage} className="h-2.5 bg-secondary" indicatorClassName="bg-primary" />
     </div>
   );
 }

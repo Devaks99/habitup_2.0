@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Habit, DayProgress, UserStats } from '@/types/habit';
-import { getTodayKey, getYesterdayKey, isHabitActiveOnDate, getLevel } from '@/types/habit';
+import {
+  getTodayKey,
+  getYesterdayKey,
+  isHabitActiveOnDate,
+  getLevel,
+  getDateDiffInDays,
+  getDateFromKey,
+} from '@/types/habit';
 
 
 const HABITS_KEY = 'habits-app-habits';
@@ -30,12 +37,6 @@ function normalizeStats(saved: UserStats, currentDate: string): UserStats {
   if (!merged.lastCompletedDate) {
     return merged;
   }
-
-  const yesterday = getYesterdayKey();
-  if (merged.lastCompletedDate !== yesterday && merged.lastCompletedDate !== currentDate) {
-    return { ...merged, currentStreak: 0 };
-  }
-
   return merged;
 }
 
@@ -71,7 +72,91 @@ function createPauseConsciousHabit(order: number): Habit {
   };
 }
 
-const DEFAULT_STATS: UserStats = { totalXp: 0, level: 1, currentStreak: 0, lastCompletedDate: null };
+const DEFAULT_STATS: UserStats = {
+  totalXp: 0,
+  level: 1,
+  currentStreak: 0,
+  lastCompletedDate: null,
+  streakRiskStage: 0,
+  pendingWarningDate: null,
+  streakBackupLastCompletedDate: null,
+  streakBackupRiskStage: 0,
+};
+
+function clearStreakRisk(stats: UserStats): UserStats {
+  return {
+    ...stats,
+    streakRiskStage: 0,
+    pendingWarningDate: null,
+    streakBackupLastCompletedDate: null,
+    streakBackupRiskStage: 0,
+  };
+}
+
+function resetStreak(stats: UserStats): UserStats {
+  return clearStreakRisk({
+    ...stats,
+    currentStreak: 0,
+    lastCompletedDate: null,
+  });
+}
+
+function getStreakRiskIncrement(currentStreak: number, activeHabits: Habit[], completedHabitIds: string[]): number | null {
+  if (currentStreak <= 0 || activeHabits.length === 0) {
+    return null;
+  }
+
+  const missedHabits = activeHabits.filter((habit) => !completedHabitIds.includes(habit.id));
+  if (missedHabits.length === 0) {
+    return null;
+  }
+
+  const onlyOneDailyMiss =
+    activeHabits.length > 1 &&
+    missedHabits.length === 1 &&
+    missedHabits[0].type === 'daily';
+
+  if (onlyOneDailyMiss) {
+    return 1;
+  }
+
+  if (currentStreak >= 5 && missedHabits.length > 1) {
+    return 2;
+  }
+
+  return null;
+}
+
+function evaluateMissedDay(stats: UserStats, dayProgress: DayProgress, habits: Habit[], currentDate: string): UserStats {
+  const referenceDate = getDateFromKey(dayProgress.date);
+  const activeHabits = habits.filter((habit) => isHabitActiveOnDate(habit, referenceDate));
+  const completedActiveIds = dayProgress.completedHabitIds.filter((id) =>
+    activeHabits.some((habit) => habit.id === id),
+  );
+  const allDone = activeHabits.length > 0 && activeHabits.every((habit) => completedActiveIds.includes(habit.id));
+
+  if (activeHabits.length === 0 || allDone) {
+    return clearStreakRisk(stats);
+  }
+
+  const riskIncrement = getStreakRiskIncrement(stats.currentStreak, activeHabits, completedActiveIds);
+  if (riskIncrement === null) {
+    return resetStreak(stats);
+  }
+
+  const nextRiskStage = (stats.streakRiskStage ?? 0) + riskIncrement;
+  if (nextRiskStage >= 3) {
+    return resetStreak(stats);
+  }
+
+  return {
+    ...stats,
+    streakRiskStage: nextRiskStage,
+    pendingWarningDate: nextRiskStage >= 2 ? currentDate : null,
+    streakBackupLastCompletedDate: null,
+    streakBackupRiskStage: 0,
+  };
+}
 
 export function useHabits() {
   const [currentDate, setCurrentDate] = useState(() => getTodayKey());
@@ -130,9 +215,30 @@ export function useHabits() {
   }, [currentDate]);
 
   useEffect(() => {
+    setStats((prev) => {
+      const normalized = normalizeStats(prev, currentDate);
+
+      if (progress.date === currentDate) {
+        if (normalized.pendingWarningDate && normalized.pendingWarningDate !== currentDate) {
+          return { ...normalized, pendingWarningDate: null };
+        }
+        return normalized;
+      }
+
+      const dayGap = getDateDiffInDays(progress.date, currentDate);
+      if (dayGap > 1) {
+        const yesterday = getYesterdayKey(getDateFromKey(currentDate));
+        if (normalized.lastCompletedDate === yesterday || normalized.lastCompletedDate === currentDate) {
+          return clearStreakRisk({ ...normalized, pendingWarningDate: null });
+        }
+        return resetStreak(normalized);
+      }
+
+      return evaluateMissedDay(normalized, progress, habits, currentDate);
+    });
+
     setProgress((prev) => normalizeProgress(prev, currentDate));
-    setStats((prev) => normalizeStats(prev, currentDate));
-  }, [currentDate]);
+  }, [currentDate, habits, progress]);
 
   useEffect(() => {
     setHabits((prev) => {
@@ -221,24 +327,54 @@ export function useHabits() {
 
         let newStreak = s.currentStreak;
         let newLastDate = s.lastCompletedDate;
+        let newRiskStage = s.streakRiskStage ?? 0;
+        let newPendingWarningDate = s.pendingWarningDate ?? null;
+        let newBackupLastCompletedDate = s.streakBackupLastCompletedDate ?? null;
+        let newBackupRiskStage = s.streakBackupRiskStage ?? 0;
 
         if (allDone && !baseProgress.allCompleted) {
           // Just completed all habits today
-          if (s.lastCompletedDate === getYesterdayKey(referenceDate) || s.lastCompletedDate === today) {
+          const canContinueStreak =
+            s.lastCompletedDate === getYesterdayKey(referenceDate) ||
+            s.lastCompletedDate === today ||
+            (s.currentStreak > 0 && (s.streakRiskStage ?? 0) > 0);
+
+          if (canContinueStreak) {
             newStreak = s.lastCompletedDate === today ? s.currentStreak : s.currentStreak + 1;
           } else {
             newStreak = 1; // Start new streak
           }
+
+          newBackupLastCompletedDate = s.lastCompletedDate;
+          newBackupRiskStage = s.streakRiskStage ?? 0;
           newLastDate = today;
+          newRiskStage = 0;
+          newPendingWarningDate = null;
         } else if (!allDone && baseProgress.allCompleted) {
           // Unchecked a habit, lost today's completion
           if (s.lastCompletedDate === today) {
             newStreak = Math.max(0, s.currentStreak - 1);
-            newLastDate = newStreak > 0 ? getYesterdayKey(referenceDate) : null;
+            newLastDate =
+              newStreak > 0
+                ? (s.streakBackupLastCompletedDate ?? getYesterdayKey(referenceDate))
+                : null;
+            newRiskStage = s.streakBackupRiskStage ?? 0;
+            newPendingWarningDate = newRiskStage >= 2 ? today : null;
+            newBackupLastCompletedDate = null;
+            newBackupRiskStage = 0;
           }
         }
 
-        return { totalXp: newXp, level: getLevel(newXp), currentStreak: newStreak, lastCompletedDate: newLastDate };
+        return {
+          totalXp: newXp,
+          level: getLevel(newXp),
+          currentStreak: newStreak,
+          lastCompletedDate: newLastDate,
+          streakRiskStage: newRiskStage,
+          pendingWarningDate: newPendingWarningDate,
+          streakBackupLastCompletedDate: newBackupLastCompletedDate,
+          streakBackupRiskStage: newBackupRiskStage,
+        };
       });
 
       return {
@@ -251,7 +387,11 @@ export function useHabits() {
   }, [habits, currentDate]);
 
   const resetXp = useCallback(() => {
-    setStats({ totalXp: 0, level: 1, currentStreak: 0, lastCompletedDate: null });
+    setStats(DEFAULT_STATS);
+  }, []);
+
+  const dismissStreakWarning = useCallback(() => {
+    setStats((prev) => ({ ...prev, pendingWarningDate: null }));
   }, []);
 
   const reorderHabits = useCallback((habitIds: string[]) => {
@@ -291,5 +431,7 @@ export function useHabits() {
     xpPopup,
     celebrationMessage,
     reorderHabits,
+    streakWarningOpen: stats.pendingWarningDate === currentDate,
+    dismissStreakWarning,
   };
 }

@@ -36,6 +36,10 @@ export interface UserStats {
   level: number;
   currentStreak: number;
   lastCompletedDate: string | null; // YYYY-MM-DD
+  streakRiskStage?: number;
+  pendingWarningDate?: string | null;
+  streakBackupLastCompletedDate?: string | null;
+  streakBackupRiskStage?: number;
 }
 
 export function getLevel(xp: number): number {
@@ -70,6 +74,27 @@ export function getYesterdayKey(date: Date = new Date()): string {
   const d = new Date(date);
   d.setDate(d.getDate() - 1);
   return getDateKey(d);
+}
+
+export function addDays(date: Date, amount: number): Date {
+  const next = new Date(date);
+  next.setDate(next.getDate() + amount);
+  return next;
+}
+
+export function getTomorrowKey(date: Date = new Date()): string {
+  return getDateKey(addDays(date, 1));
+}
+
+export function getDateFromKey(dateKey: string): Date {
+  return new Date(`${dateKey}T12:00:00`);
+}
+
+export function getDateDiffInDays(fromDateKey: string, toDateKey: string): number {
+  const from = getDateFromKey(fromDateKey);
+  const to = getDateFromKey(toDateKey);
+  const msPerDay = 24 * 60 * 60 * 1000;
+  return Math.round((to.getTime() - from.getTime()) / msPerDay);
 }
 
 export function getTodayWeekDay(date: Date = new Date()): WeekDay {
