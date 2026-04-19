@@ -19,6 +19,7 @@ import {
 
 interface ShareProgressDialogProps {
   streak: number;
+  completionPerfect?: boolean;
   level: number;
   totalXp: number;
 }
@@ -59,6 +60,13 @@ function getCanvasPalette(tone: ReturnType<typeof getStreakTheme>['tone']) {
         frameColor: '#fbbf24',
         topGlow: 'rgba(251, 191, 36, 0.14)',
         bottomGlow: 'rgba(245, 158, 11, 0.14)',
+      };
+    case 'green':
+      return {
+        backgroundStops: ['#edfdf4', '#e3f8ea', '#f1fbf4', '#f8fdf9'],
+        frameColor: '#10b981',
+        topGlow: 'rgba(16, 185, 129, 0.14)',
+        bottomGlow: 'rgba(52, 211, 153, 0.16)',
       };
     default:
       return {
@@ -110,13 +118,18 @@ function loadCanvasImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-export function ShareProgressDialog({ streak, level, totalXp }: ShareProgressDialogProps) {
+export function ShareProgressDialog({
+  streak,
+  completionPerfect = false,
+  level,
+  totalXp,
+}: ShareProgressDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedMascot, setSelectedMascot] = useState<ShareMascotId>(() => getDefaultMascotId(streak));
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const streakTheme = getStreakTheme(streak);
+  const streakTheme = getStreakTheme(streak, completionPerfect);
 
   useEffect(() => {
     setSelectedMascot(prev => isMascotUnlocked(prev, streak) ? prev : getDefaultMascotId(streak));

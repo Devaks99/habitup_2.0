@@ -18,7 +18,7 @@ export type ShareMascotId =
   | 'purple-bolt';
 
 export interface StreakTheme {
-  tone: 'neutral' | 'amber' | 'orange' | 'red' | 'purple' | 'purple-bolt';
+  tone: 'neutral' | 'green' | 'amber' | 'orange' | 'red' | 'purple' | 'purple-bolt';
   cardClassName: string;
   bodyTextClassName: string;
   mutedTextClassName: string;
@@ -32,6 +32,35 @@ export interface StreakTheme {
   shareAccentColor: string;
   shareGlowTop: string;
   shareGlowBottom: string;
+  shareStreakLabelColor: string;
+}
+
+interface TonePalette {
+  tone: Exclude<StreakTheme['tone'], 'neutral'>;
+  activeCardClassName: string;
+  inactiveCardClassName: string;
+  activeBodyTextClassName: string;
+  inactiveBodyTextClassName: string;
+  activeMutedTextClassName: string;
+  inactiveMutedTextClassName: string;
+  streakPillClassName: string;
+  activeSummaryTextClassName: string;
+  inactiveSummaryTextClassName: string;
+  activeXpBarClassName: string;
+  inactiveXpBarClassName: string;
+  activeXpBarIndicatorClassName: string;
+  inactiveXpBarIndicatorClassName: string;
+  activeProgressRingColor: string;
+  inactiveProgressRingColor: string;
+  activeShareFrameClassName: string;
+  inactiveShareFrameClassName: string;
+  activeShareBackground: string;
+  inactiveShareBackground: string;
+  shareAccentColor: string;
+  activeShareGlowTop: string;
+  inactiveShareGlowTop: string;
+  activeShareGlowBottom: string;
+  inactiveShareGlowBottom: string;
   shareStreakLabelColor: string;
 }
 
@@ -84,105 +113,225 @@ export function getStreakMascot(
   return mascotDefault;
 }
 
-export function getStreakTheme(streak: number): StreakTheme {
+function createToneTheme(palette: TonePalette, active: boolean): StreakTheme {
+  return {
+    tone: palette.tone,
+    cardClassName: active ? palette.activeCardClassName : palette.inactiveCardClassName,
+    bodyTextClassName: active ? palette.activeBodyTextClassName : palette.inactiveBodyTextClassName,
+    mutedTextClassName: active ? palette.activeMutedTextClassName : palette.inactiveMutedTextClassName,
+    streakPillClassName: palette.streakPillClassName,
+    summaryTextClassName: active ? palette.activeSummaryTextClassName : palette.inactiveSummaryTextClassName,
+    xpBarClassName: active ? palette.activeXpBarClassName : palette.inactiveXpBarClassName,
+    xpBarIndicatorClassName: active
+      ? palette.activeXpBarIndicatorClassName
+      : palette.inactiveXpBarIndicatorClassName,
+    progressRingColor: active ? palette.activeProgressRingColor : palette.inactiveProgressRingColor,
+    shareFrameClassName: active ? palette.activeShareFrameClassName : palette.inactiveShareFrameClassName,
+    shareBackground: active ? palette.activeShareBackground : palette.inactiveShareBackground,
+    shareAccentColor: palette.shareAccentColor,
+    shareGlowTop: active ? palette.activeShareGlowTop : palette.inactiveShareGlowTop,
+    shareGlowBottom: active ? palette.activeShareGlowBottom : palette.inactiveShareGlowBottom,
+    shareStreakLabelColor: palette.shareStreakLabelColor,
+  };
+}
+
+const GREEN_THEME: TonePalette = {
+  tone: 'green',
+  activeCardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-emerald-50 border-emerald-300/90',
+  inactiveCardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-card border-emerald-300/90',
+  activeBodyTextClassName: 'text-[#1f3b2d]',
+  inactiveBodyTextClassName: 'text-[#2f4d3d]',
+  activeMutedTextClassName: 'text-[#527160]',
+  inactiveMutedTextClassName: 'text-[#64806f]',
+  streakPillClassName: 'bg-emerald-100 text-[#256146]',
+  activeSummaryTextClassName: 'text-[#4b6a58]',
+  inactiveSummaryTextClassName: 'text-[#597364]',
+  activeXpBarClassName: 'h-1.5 bg-emerald-100 [&>div]:bg-emerald-500 [&>div]:transition-all [&>div]:duration-500',
+  inactiveXpBarClassName: 'h-1.5 bg-emerald-100/70 [&>div]:bg-emerald-400 [&>div]:transition-all [&>div]:duration-500',
+  activeXpBarIndicatorClassName: 'bg-emerald-500',
+  inactiveXpBarIndicatorClassName: 'bg-emerald-400',
+  activeProgressRingColor: '#10b981',
+  inactiveProgressRingColor: '#34d399',
+  activeShareFrameClassName: 'border border-emerald-300/75 bg-emerald-50',
+  inactiveShareFrameClassName: 'border border-emerald-300/75 bg-white',
+  activeShareBackground: 'linear-gradient(145deg, #edfdf4 0%, #e3f8ea 35%, #f1fbf4 68%, #f8fdf9 100%)',
+  inactiveShareBackground: 'linear-gradient(145deg, #ffffff 0%, #f8fdf9 40%, #f2fbf6 100%)',
+  shareAccentColor: '#059669',
+  activeShareGlowTop: 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)',
+  inactiveShareGlowTop: 'radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%)',
+  activeShareGlowBottom: 'radial-gradient(circle, rgba(52, 211, 153, 0.14) 0%, transparent 70%)',
+  inactiveShareGlowBottom: 'radial-gradient(circle, rgba(52, 211, 153, 0.1) 0%, transparent 70%)',
+  shareStreakLabelColor: '#047857',
+};
+
+const AMBER_THEME: TonePalette = {
+  tone: 'amber',
+  activeCardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-amber-50 border-amber-300/90',
+  inactiveCardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-card border-amber-300/90',
+  activeBodyTextClassName: 'text-[#4d3f2f]',
+  inactiveBodyTextClassName: 'text-[#5b4b38]',
+  activeMutedTextClassName: 'text-[#836f4a]',
+  inactiveMutedTextClassName: 'text-[#8f7b55]',
+  streakPillClassName: 'bg-amber-100 text-[#7d5f0e]',
+  activeSummaryTextClassName: 'text-[#735f3f]',
+  inactiveSummaryTextClassName: 'text-[#7f6946]',
+  activeXpBarClassName: 'h-1.5 bg-amber-100 [&>div]:bg-amber-400 [&>div]:transition-all [&>div]:duration-500',
+  inactiveXpBarClassName: 'h-1.5 bg-amber-100/70 [&>div]:bg-amber-300 [&>div]:transition-all [&>div]:duration-500',
+  activeXpBarIndicatorClassName: 'bg-amber-400',
+  inactiveXpBarIndicatorClassName: 'bg-amber-300',
+  activeProgressRingColor: '#fbbf24',
+  inactiveProgressRingColor: '#fcd34d',
+  activeShareFrameClassName: 'border border-amber-300/75 bg-amber-50',
+  inactiveShareFrameClassName: 'border border-amber-300/75 bg-white',
+  activeShareBackground: 'linear-gradient(145deg, #fffaf0 0%, #fff3d6 35%, #fff8e7 68%, #fffcf3 100%)',
+  inactiveShareBackground: 'linear-gradient(145deg, #ffffff 0%, #fffaf0 40%, #fffcf6 100%)',
+  shareAccentColor: '#f59e0b',
+  activeShareGlowTop: 'radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%)',
+  inactiveShareGlowTop: 'radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%)',
+  activeShareGlowBottom: 'radial-gradient(circle, rgba(251, 191, 36, 0.14) 0%, transparent 70%)',
+  inactiveShareGlowBottom: 'radial-gradient(circle, rgba(251, 191, 36, 0.1) 0%, transparent 70%)',
+  shareStreakLabelColor: '#d97706',
+};
+
+const ORANGE_THEME: TonePalette = {
+  tone: 'orange',
+  activeCardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-orange-50 border-orange-400/90',
+  inactiveCardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-card border-orange-400/90',
+  activeBodyTextClassName: 'text-[#43322c]',
+  inactiveBodyTextClassName: 'text-[#543f36]',
+  activeMutedTextClassName: 'text-[#7c554a]',
+  inactiveMutedTextClassName: 'text-[#8a6257]',
+  streakPillClassName: 'bg-orange-100 text-[#8d4517]',
+  activeSummaryTextClassName: 'text-[#6d4c40]',
+  inactiveSummaryTextClassName: 'text-[#7a584a]',
+  activeXpBarClassName: 'h-1.5 bg-orange-100 [&>div]:bg-orange-400 [&>div]:transition-all [&>div]:duration-500',
+  inactiveXpBarClassName: 'h-1.5 bg-orange-100/70 [&>div]:bg-orange-300 [&>div]:transition-all [&>div]:duration-500',
+  activeXpBarIndicatorClassName: 'bg-orange-400',
+  inactiveXpBarIndicatorClassName: 'bg-orange-300',
+  activeProgressRingColor: '#fb923c',
+  inactiveProgressRingColor: '#fdba74',
+  activeShareFrameClassName: 'border border-orange-400/75 bg-orange-50',
+  inactiveShareFrameClassName: 'border border-orange-400/75 bg-white',
+  activeShareBackground: 'linear-gradient(145deg, #fff7ee 0%, #ffefd9 35%, #fff5e8 68%, #fffaf2 100%)',
+  inactiveShareBackground: 'linear-gradient(145deg, #ffffff 0%, #fff8f1 40%, #fffbf6 100%)',
+  shareAccentColor: '#f97316',
+  activeShareGlowTop: 'radial-gradient(circle, rgba(251, 146, 60, 0.12) 0%, transparent 70%)',
+  inactiveShareGlowTop: 'radial-gradient(circle, rgba(251, 146, 60, 0.08) 0%, transparent 70%)',
+  activeShareGlowBottom: 'radial-gradient(circle, rgba(245, 158, 11, 0.14) 0%, transparent 70%)',
+  inactiveShareGlowBottom: 'radial-gradient(circle, rgba(245, 158, 11, 0.1) 0%, transparent 70%)',
+  shareStreakLabelColor: '#ea580c',
+};
+
+const RED_THEME: TonePalette = {
+  tone: 'red',
+  activeCardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-red-50 border-red-500/90',
+  inactiveCardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-card border-red-500/90',
+  activeBodyTextClassName: 'text-[#38241f]',
+  inactiveBodyTextClassName: 'text-[#4b302a]',
+  activeMutedTextClassName: 'text-[#6f4a45]',
+  inactiveMutedTextClassName: 'text-[#7d5954]',
+  streakPillClassName: 'bg-red-100 text-[#7b1f1f]',
+  activeSummaryTextClassName: 'text-[#62403c]',
+  inactiveSummaryTextClassName: 'text-[#6f4e49]',
+  activeXpBarClassName: 'h-1.5 bg-red-100 [&>div]:bg-red-500 [&>div]:transition-all [&>div]:duration-500',
+  inactiveXpBarClassName: 'h-1.5 bg-red-100/70 [&>div]:bg-red-400 [&>div]:transition-all [&>div]:duration-500',
+  activeXpBarIndicatorClassName: 'bg-red-500',
+  inactiveXpBarIndicatorClassName: 'bg-red-400',
+  activeProgressRingColor: '#ef4444',
+  inactiveProgressRingColor: '#f87171',
+  activeShareFrameClassName: 'border border-red-500/75 bg-red-50',
+  inactiveShareFrameClassName: 'border border-red-500/75 bg-white',
+  activeShareBackground: 'linear-gradient(145deg, #fff2ef 0%, #ffe7e0 35%, #fff0ea 68%, #fff7f3 100%)',
+  inactiveShareBackground: 'linear-gradient(145deg, #ffffff 0%, #fff7f5 40%, #fffaf8 100%)',
+  shareAccentColor: '#dc2626',
+  activeShareGlowTop: 'radial-gradient(circle, rgba(239, 68, 68, 0.12) 0%, transparent 70%)',
+  inactiveShareGlowTop: 'radial-gradient(circle, rgba(239, 68, 68, 0.08) 0%, transparent 70%)',
+  activeShareGlowBottom: 'radial-gradient(circle, rgba(251, 146, 60, 0.16) 0%, transparent 70%)',
+  inactiveShareGlowBottom: 'radial-gradient(circle, rgba(251, 146, 60, 0.1) 0%, transparent 70%)',
+  shareStreakLabelColor: '#dc2626',
+};
+
+const PURPLE_THEME: TonePalette = {
+  tone: 'purple',
+  activeCardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-fuchsia-50 border-fuchsia-400/90',
+  inactiveCardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-card border-fuchsia-400/90',
+  activeBodyTextClassName: 'text-[#35234b]',
+  inactiveBodyTextClassName: 'text-[#48335f]',
+  activeMutedTextClassName: 'text-[#6e5a8a]',
+  inactiveMutedTextClassName: 'text-[#7d6a98]',
+  streakPillClassName: 'bg-fuchsia-100 text-[#9137b8]',
+  activeSummaryTextClassName: 'text-[#66547b]',
+  inactiveSummaryTextClassName: 'text-[#746287]',
+  activeXpBarClassName: 'h-1.5 bg-fuchsia-100 [&>div]:bg-fuchsia-500 [&>div]:transition-all [&>div]:duration-500',
+  inactiveXpBarClassName: 'h-1.5 bg-fuchsia-100/70 [&>div]:bg-fuchsia-400 [&>div]:transition-all [&>div]:duration-500',
+  activeXpBarIndicatorClassName: 'bg-fuchsia-500',
+  inactiveXpBarIndicatorClassName: 'bg-fuchsia-400',
+  activeProgressRingColor: '#d946ef',
+  inactiveProgressRingColor: '#e879f9',
+  activeShareFrameClassName: 'border border-fuchsia-400/75 bg-fuchsia-50',
+  inactiveShareFrameClassName: 'border border-fuchsia-400/75 bg-white',
+  activeShareBackground: 'linear-gradient(145deg, #fff1fb 0%, #f9e8ff 32%, #f4e4ff 62%, #fff3fb 100%)',
+  inactiveShareBackground: 'linear-gradient(145deg, #ffffff 0%, #fcf4ff 40%, #fff8fc 100%)',
+  shareAccentColor: '#c026d3',
+  activeShareGlowTop: 'radial-gradient(circle, rgba(192, 38, 211, 0.14) 0%, transparent 70%)',
+  inactiveShareGlowTop: 'radial-gradient(circle, rgba(192, 38, 211, 0.08) 0%, transparent 70%)',
+  activeShareGlowBottom: 'radial-gradient(circle, rgba(217, 70, 239, 0.16) 0%, transparent 70%)',
+  inactiveShareGlowBottom: 'radial-gradient(circle, rgba(217, 70, 239, 0.1) 0%, transparent 70%)',
+  shareStreakLabelColor: '#c026d3',
+};
+
+const PURPLE_BOLT_THEME: TonePalette = {
+  tone: 'purple-bolt',
+  activeCardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-violet-50 border-violet-500/90',
+  inactiveCardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-card border-violet-500/90',
+  activeBodyTextClassName: 'text-[#2d1f46]',
+  inactiveBodyTextClassName: 'text-[#3e3058]',
+  activeMutedTextClassName: 'text-[#654d8d]',
+  inactiveMutedTextClassName: 'text-[#745d9b]',
+  streakPillClassName: 'bg-violet-100 text-[#5a2ca0]',
+  activeSummaryTextClassName: 'text-[#5b4a7b]',
+  inactiveSummaryTextClassName: 'text-[#695788]',
+  activeXpBarClassName: 'h-1.5 bg-violet-100 [&>div]:bg-violet-500 [&>div]:transition-all [&>div]:duration-500',
+  inactiveXpBarClassName: 'h-1.5 bg-violet-100/70 [&>div]:bg-violet-400 [&>div]:transition-all [&>div]:duration-500',
+  activeXpBarIndicatorClassName: 'bg-violet-500',
+  inactiveXpBarIndicatorClassName: 'bg-violet-400',
+  activeProgressRingColor: '#8b5cf6',
+  inactiveProgressRingColor: '#a78bfa',
+  activeShareFrameClassName: 'border border-violet-500/75 bg-violet-50',
+  inactiveShareFrameClassName: 'border border-violet-500/75 bg-white',
+  activeShareBackground: 'linear-gradient(145deg, #f4eefe 0%, #efe4ff 35%, #efe0ff 65%, #f6ebff 100%)',
+  inactiveShareBackground: 'linear-gradient(145deg, #ffffff 0%, #f7f2ff 40%, #fbf8ff 100%)',
+  shareAccentColor: '#7c3aed',
+  activeShareGlowTop: 'radial-gradient(circle, rgba(139, 92, 246, 0.14) 0%, transparent 70%)',
+  inactiveShareGlowTop: 'radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%)',
+  activeShareGlowBottom: 'radial-gradient(circle, rgba(168, 85, 247, 0.16) 0%, transparent 70%)',
+  inactiveShareGlowBottom: 'radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, transparent 70%)',
+  shareStreakLabelColor: '#7c3aed',
+};
+
+export function getStreakTheme(streak: number, completionPerfect = false): StreakTheme {
   if (streak >= 15) {
-    return {
-      tone: 'purple-bolt',
-      cardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-violet-50 border-violet-500/90',
-      bodyTextClassName: 'text-[#2d1f46]',
-      mutedTextClassName: 'text-[#654d8d]',
-      streakPillClassName: 'bg-violet-100 text-[#5a2ca0]',
-      summaryTextClassName: 'text-[#5b4a7b]',
-      xpBarClassName: 'h-1.5 bg-violet-100 [&>div]:bg-violet-500 [&>div]:transition-all [&>div]:duration-500',
-      xpBarIndicatorClassName: 'bg-violet-500',
-      progressRingColor: '#8b5cf6',
-      shareFrameClassName: 'border border-violet-500/75 bg-violet-50',
-      shareBackground: 'linear-gradient(145deg, #f4eefe 0%, #efe4ff 35%, #efe0ff 65%, #f6ebff 100%)',
-      shareAccentColor: '#7c3aed',
-      shareGlowTop: 'radial-gradient(circle, rgba(139, 92, 246, 0.14) 0%, transparent 70%)',
-      shareGlowBottom: 'radial-gradient(circle, rgba(168, 85, 247, 0.16) 0%, transparent 70%)',
-      shareStreakLabelColor: '#7c3aed',
-    };
+    return createToneTheme(PURPLE_BOLT_THEME, completionPerfect);
   }
 
   if (streak >= 10) {
-    return {
-      tone: 'purple',
-      cardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-fuchsia-50 border-fuchsia-400/90',
-      bodyTextClassName: 'text-[#35234b]',
-      mutedTextClassName: 'text-[#6e5a8a]',
-      streakPillClassName: 'bg-fuchsia-100 text-[#9137b8]',
-      summaryTextClassName: 'text-[#66547b]',
-      xpBarClassName: 'h-1.5 bg-fuchsia-100 [&>div]:bg-fuchsia-500 [&>div]:transition-all [&>div]:duration-500',
-      xpBarIndicatorClassName: 'bg-fuchsia-500',
-      progressRingColor: '#d946ef',
-      shareFrameClassName: 'border border-fuchsia-400/75 bg-fuchsia-50',
-      shareBackground: 'linear-gradient(145deg, #fff1fb 0%, #f9e8ff 32%, #f4e4ff 62%, #fff3fb 100%)',
-      shareAccentColor: '#c026d3',
-      shareGlowTop: 'radial-gradient(circle, rgba(192, 38, 211, 0.14) 0%, transparent 70%)',
-      shareGlowBottom: 'radial-gradient(circle, rgba(217, 70, 239, 0.16) 0%, transparent 70%)',
-      shareStreakLabelColor: '#c026d3',
-    };
+    return createToneTheme(PURPLE_THEME, completionPerfect);
   }
 
   if (streak >= 5) {
-    return {
-      tone: 'red',
-      cardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-red-50 border-red-500/90',
-      bodyTextClassName: 'text-[#38241f]',
-      mutedTextClassName: 'text-[#6f4a45]',
-      streakPillClassName: 'bg-red-100 text-[#7b1f1f]',
-      summaryTextClassName: 'text-[#62403c]',
-      xpBarClassName: 'h-1.5 bg-red-100 [&>div]:bg-red-500 [&>div]:transition-all [&>div]:duration-500',
-      xpBarIndicatorClassName: 'bg-red-500',
-      progressRingColor: '#ef4444',
-      shareFrameClassName: 'border border-red-500/75 bg-red-50',
-      shareBackground: 'linear-gradient(145deg, #fff2ef 0%, #ffe7e0 35%, #fff0ea 68%, #fff7f3 100%)',
-      shareAccentColor: '#dc2626',
-      shareGlowTop: 'radial-gradient(circle, rgba(239, 68, 68, 0.12) 0%, transparent 70%)',
-      shareGlowBottom: 'radial-gradient(circle, rgba(251, 146, 60, 0.16) 0%, transparent 70%)',
-      shareStreakLabelColor: '#dc2626',
-    };
+    return createToneTheme(RED_THEME, completionPerfect);
   }
 
   if (streak >= 3) {
-    return {
-      tone: 'orange',
-      cardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-orange-50 border-orange-400/90',
-      bodyTextClassName: 'text-[#43322c]',
-      mutedTextClassName: 'text-[#7c554a]',
-      streakPillClassName: 'bg-orange-100 text-[#8d4517]',
-      summaryTextClassName: 'text-[#6d4c40]',
-      xpBarClassName: 'h-1.5 bg-orange-100 [&>div]:bg-orange-400 [&>div]:transition-all [&>div]:duration-500',
-      xpBarIndicatorClassName: 'bg-orange-400',
-      progressRingColor: '#fb923c',
-      shareFrameClassName: 'border border-orange-400/75 bg-orange-50',
-      shareBackground: 'linear-gradient(145deg, #fff7ee 0%, #ffefd9 35%, #fff5e8 68%, #fffaf2 100%)',
-      shareAccentColor: '#f97316',
-      shareGlowTop: 'radial-gradient(circle, rgba(251, 146, 60, 0.12) 0%, transparent 70%)',
-      shareGlowBottom: 'radial-gradient(circle, rgba(245, 158, 11, 0.14) 0%, transparent 70%)',
-      shareStreakLabelColor: '#ea580c',
-    };
+    return createToneTheme(ORANGE_THEME, completionPerfect);
   }
 
-  if (streak > 0) {
-    return {
-      tone: 'amber',
-      cardClassName: 'rounded-2xl border-2 p-5 transition-all duration-500 bg-amber-50 border-amber-300/90',
-      bodyTextClassName: 'text-[#4d3f2f]',
-      mutedTextClassName: 'text-[#836f4a]',
-      streakPillClassName: 'bg-amber-100 text-[#7d5f0e]',
-      summaryTextClassName: 'text-[#735f3f]',
-      xpBarClassName: 'h-1.5 bg-amber-100 [&>div]:bg-amber-400 [&>div]:transition-all [&>div]:duration-500',
-      xpBarIndicatorClassName: 'bg-amber-400',
-      progressRingColor: '#fbbf24',
-      shareFrameClassName: 'border border-amber-300/75 bg-amber-50',
-      shareBackground: 'linear-gradient(145deg, #fffaf0 0%, #fff3d6 35%, #fff8e7 68%, #fffcf3 100%)',
-      shareAccentColor: '#f59e0b',
-      shareGlowTop: 'radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%)',
-      shareGlowBottom: 'radial-gradient(circle, rgba(251, 191, 36, 0.14) 0%, transparent 70%)',
-      shareStreakLabelColor: '#d97706',
-    };
+  if (streak >= 2) {
+    return createToneTheme(AMBER_THEME, completionPerfect);
+  }
+
+  if (streak >= 1 || completionPerfect) {
+    return createToneTheme(GREEN_THEME, completionPerfect);
   }
 
   return {
@@ -192,9 +341,9 @@ export function getStreakTheme(streak: number): StreakTheme {
     mutedTextClassName: 'text-[#6b6b6b]',
     streakPillClassName: 'bg-muted text-muted-foreground',
     summaryTextClassName: 'text-[#525252]',
-    xpBarClassName: 'h-1.5 bg-secondary [&>div]:bg-xp [&>div]:transition-all [&>div]:duration-500',
-    xpBarIndicatorClassName: 'bg-xp',
-    progressRingColor: 'hsl(var(--xp))',
+    xpBarClassName: 'h-1.5 bg-secondary [&>div]:bg-emerald-500 [&>div]:transition-all [&>div]:duration-500',
+    xpBarIndicatorClassName: 'bg-emerald-500',
+    progressRingColor: '#10b981',
     shareFrameClassName: 'border border-border/50 bg-white',
     shareBackground: 'linear-gradient(145deg, #e8f5e8 0%, #f0f7e8 30%, #fdf8ef 60%, #fff9f0 100%)',
     shareAccentColor: '#4a8c5c',

@@ -122,7 +122,7 @@ const Index = ({ profile }: IndexProps) => {
   const greeting = getGreeting();
   const xpProgress = getXpProgress(stats.totalXp);
   const hasStreak = stats.currentStreak > 0;
-  const streakTheme = getStreakTheme(stats.currentStreak);
+  const streakTheme = getStreakTheme(stats.currentStreak, completionPercentage === 100);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -294,7 +294,9 @@ const Index = ({ profile }: IndexProps) => {
                 {/* Streak + Level pills */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all duration-500 ${
-                    hasStreak ? streakTheme.streakPillClassName : 'bg-muted text-muted-foreground'
+                    hasStreak || completionPercentage === 100
+                      ? streakTheme.streakPillClassName
+                      : 'bg-muted text-muted-foreground'
                   }`}>
                     <Flame className="w-3 h-3" />
                     {stats.currentStreak} {stats.currentStreak === 1 ? 'dia' : 'dias'}
@@ -340,6 +342,7 @@ const Index = ({ profile }: IndexProps) => {
               <div className="flex justify-center sm:justify-end">
                 <ShareProgressDialog
                   streak={stats.currentStreak}
+                  completionPerfect={completionPercentage === 100}
                   level={stats.level}
                   totalXp={stats.totalXp}
                 />
